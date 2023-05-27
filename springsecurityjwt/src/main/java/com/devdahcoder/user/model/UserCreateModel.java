@@ -1,13 +1,22 @@
 package com.devdahcoder.user.model;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.Objects;
 
 public class UserCreateModel {
 
+	@NotBlank( message = "Firstname cannot be empty" )
 	private String firstName;
+	@NotBlank( message = "Lastname cannot be empty" )
 	private String lastName;
+	@Email( message = "Email must be a  valid email" )
+	@NotBlank( message = "Email cannot be empty" )
 	private String email;
+	@NotBlank( message = "Username cannot be empty" )
 	private String username;
+	@NotBlank( message = "Password cannot be empty" )
 	private String password;
 
 	public UserCreateModel() {

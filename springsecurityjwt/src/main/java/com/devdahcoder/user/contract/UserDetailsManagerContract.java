@@ -11,4 +11,6 @@ public interface UserDetailsManagerContract {
 
 	public String createUser(UserCreateModel userCreateModel);
 
+	public UserResponseModel findUserById(long id);
+
 }

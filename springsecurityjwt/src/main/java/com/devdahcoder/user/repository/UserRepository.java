@@ -2,7 +2,9 @@ package com.devdahcoder.user.repository;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
+import com.devdahcoder.user.exception.UserNotFoundException;
 import com.devdahcoder.user.extractor.UserResponseExtractor;
+import com.devdahcoder.user.mapper.UserResponseRowMapper;
 import com.devdahcoder.user.mapper.UserRowMapper;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserDetailsModel;
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserRepository implements UserDetailsService, UserDetailsManagerContract {
@@ -68,6 +71,16 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 		return result == 1 ? userCreateModel.getUsername() : "Not created";
 
 	}
+
+	@Override
+	public UserResponseModel findUserById(long id) {
+
+		String sqlQuery = "select * from user where id = ?";
+
+		return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), id);
+
+	}
+
 
 	public void updateUser(UserDetails user) {
 

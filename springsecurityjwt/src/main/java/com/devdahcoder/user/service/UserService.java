@@ -2,6 +2,7 @@ package com.devdahcoder.user.service;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
+import com.devdahcoder.user.exception.UserNotFoundException;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import com.devdahcoder.user.repository.UserRepository;
@@ -51,6 +52,14 @@ public class UserService implements UserDetailsService, UserDetailsManagerContra
 		return userRepository.createUser(userCreateModel);
 
 	}
+
+	@Override
+	public UserResponseModel findUserById(long id) throws UserNotFoundException {
+
+		return userRepository.findUserById(id);
+
+	}
+
 
 	public void updateUser(UserDetails user) {
 
