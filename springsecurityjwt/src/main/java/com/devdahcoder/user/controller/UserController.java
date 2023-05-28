@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,9 +43,9 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<UserResponseModel> findUserById(@PathVariable long id) throws UserNotFoundException {
+	public ResponseEntity<UserResponseModel> findUserById(@PathVariable("id") long id) throws UserNotFoundException, SQLException {
 
-		return new ResponseEntity<>(userService.findUserById(id), HttpStatus.OK);
+		return new ResponseEntity<>(userService.findUserById(id), HttpStatus.FOUND);
 
 	}
 

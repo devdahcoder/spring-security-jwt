@@ -1,6 +1,8 @@
 package com.devdahcoder.user.exception;
 
-public class UserNotFoundException extends RuntimeException{
+import org.springframework.dao.DataAccessException;
+
+public class UserNotFoundException extends DataAccessException {
 
 	public UserNotFoundException(String message) {
 

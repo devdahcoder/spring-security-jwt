@@ -13,7 +13,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService, UserDetailsManagerContract {
@@ -53,8 +55,7 @@ public class UserService implements UserDetailsService, UserDetailsManagerContra
 
 	}
 
-	@Override
-	public UserResponseModel findUserById(long id) throws UserNotFoundException {
+	public UserResponseModel findUserById(long id) throws UserNotFoundException, SQLException {
 
 		return userRepository.findUserById(id);
 

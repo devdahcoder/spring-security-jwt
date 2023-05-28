@@ -4,6 +4,7 @@ import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserDetailsManagerContract {
 
@@ -11,6 +12,6 @@ public interface UserDetailsManagerContract {
 
 	public String createUser(UserCreateModel userCreateModel);
 
-	public UserResponseModel findUserById(long id);
+//	public Optional<UserResponseModel> findUserById(long id);
 
 }

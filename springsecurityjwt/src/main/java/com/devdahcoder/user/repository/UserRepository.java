@@ -11,12 +11,14 @@ import com.devdahcoder.user.model.UserDetailsModel;
 import com.devdahcoder.user.model.UserModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,12 +74,19 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	}
 
-	@Override
-	public UserResponseModel findUserById(long id) {
+	public UserResponseModel findUserById(long id) throws SQLException {
 
-		String sqlQuery = "select * from user where id = ?";
+		try {
 
-		return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), id);
+			String sqlQuery = "select * from user where id = ?";
+
+			return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), id);
+
+		} catch (DataAccessException ex) {
+
+			throw new UserNotFoundException("User not found with id: " + id);
+
+		}
 
 	}
 
