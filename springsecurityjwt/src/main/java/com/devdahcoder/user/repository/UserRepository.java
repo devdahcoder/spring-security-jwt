@@ -2,6 +2,9 @@ package com.devdahcoder.user.repository;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
+import com.devdahcoder.user.exception.UserAlreadyExistException;
+import com.devdahcoder.user.exception.UserException;
+import com.devdahcoder.user.exception.UserNotFoundException;
 import com.devdahcoder.user.extractor.UserResponseExtractor;
 import com.devdahcoder.user.mapper.UserResponseRowMapper;
 import com.devdahcoder.user.mapper.UserRowMapper;
@@ -10,6 +13,8 @@ import com.devdahcoder.user.model.UserDetailsModel;
 import com.devdahcoder.user.model.UserModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -59,18 +64,42 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	public UserResponseModel findUserById(long id) {
 
-		String sqlQuery = "select * from school.user where id = ?";
+		try {
 
-		return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), id);
+			String sqlQuery = "select * from school.user where id = ?";
+
+			return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), id);
+
+		} catch (EmptyResultDataAccessException ex) {
+
+			throw new UserNotFoundException("User not found with id: " + id);
+
+		} catch (DataAccessException ex) {
+
+			throw new UserException("Something went wrong while retrieving your user data");
+
+		}
 
 	}
 
 	@Override
 	public UserResponseModel findUserByUsername(String username) {
 
-		String sqlQuery = "select * from user where username = ?";
+		try {
 
-		return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), username);
+			String sqlQuery = "select * from user where username = ?";
+
+			return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), username);
+
+		} catch (EmptyResultDataAccessException ex) {
+
+			throw new UserNotFoundException("User not found with username: " + username);
+
+		} catch (DataAccessException ex) {
+
+			throw new UserException("Something went wrong while retrieving your user data");
+
+		}
 
 	}
 
@@ -101,11 +130,25 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	public boolean userExists(String username) {
 
-		String sqlQuery = "select count(*) from school.user where username = ?";
+		try {
 
-		int queryResult = jdbcTemplate.queryForObject(sqlQuery, new Object[] { username }, Integer.class);
+			String sqlQuery = "select count(*) from school.user where username = ?";
 
-		return queryResult == 1;
+			int queryResult = jdbcTemplate.queryForObject(sqlQuery, new Object[] { username }, Integer.class);
+
+			if (queryResult > 0) {
+
+				throw new UserAlreadyExistException("User Already exist");
+
+			}
+
+			return false;
+
+		} catch (DataAccessException ex) {
+
+			throw new UserException("Something went wrong while retrieving user data");
+
+		}
 
 	}
 

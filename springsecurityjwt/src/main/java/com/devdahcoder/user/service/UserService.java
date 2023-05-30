@@ -2,6 +2,7 @@ package com.devdahcoder.user.service;
 
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
 import com.devdahcoder.user.exception.UserException;
+import com.devdahcoder.user.exception.UserNotFoundException;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import com.devdahcoder.user.repository.UserRepository;
@@ -39,63 +40,25 @@ public class UserService implements UserDetailsManagerContract {
 
 	public UserResponseModel findUserById(long id) {
 
-		try {
-
-			return userRepository.findUserById(id);
-
-		} catch (EmptyResultDataAccessException ex) {
-
-			throw new UserException("User not found with id: " + id);
-
-		} catch (DataAccessException ex) {
-
-			throw new UserException("Something went wrong while retrieving your user data");
-
-		}
+		return userRepository.findUserById(id);
 
 	}
 
 	@Override
-	public UserResponseModel findUserByUsername(String username) throws EmptyResultDataAccessException, DataAccessException {
+	public UserResponseModel findUserByUsername(String username) {
 
-		try {
-
-			return userRepository.findUserByUsername(username);
-
-		} catch (EmptyResultDataAccessException ex) {
-
-			throw new UserException("User not found with username: " + username);
-
-		} catch (DataAccessException ex) {
-
-			throw new RuntimeException("Something went wrong while retrieving your user data");
-
-		}
+		return userRepository.findUserByUsername(username);
 
 	}
 
 	@Override
 	public String createUser(@NotNull UserCreateModel userCreateModel) {
 
-		try {
+		userCreateModel.setPassword(passwordEncoder.encode(userCreateModel.getPassword()));
 
-			userCreateModel.setPassword(passwordEncoder.encode(userCreateModel.getPassword()));
+		userRepository.userExists(userCreateModel.getUsername());
 
-			boolean userExists  = userRepository.userExists(userCreateModel.getUsername());
-
-			if (userExists) {
-
-				throw new UserException("User Already exist");
-
-			}
-
-			return userRepository.createUser(userCreateModel);
-
-		} catch (DataAccessException ex) {
-
-			throw new RuntimeException(ex);
-
-		}
+		return userRepository.createUser(userCreateModel);
 
 	}
 

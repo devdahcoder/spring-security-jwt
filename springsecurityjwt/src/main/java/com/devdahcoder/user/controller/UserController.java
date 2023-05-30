@@ -25,6 +25,7 @@ public class UserController {
 	}
 
 	@GetMapping
+	@ResponseStatus(code = HttpStatus.OK)
 	public ResponseEntity<List<UserResponseModel>> findAllUsers() {
 
 		return new ResponseEntity<>(userService.findAllUsers(), HttpStatus.OK);
@@ -32,6 +33,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}")
+	@ResponseStatus(code = HttpStatus.FOUND)
 	public ResponseEntity<UserResponseModel> findUserById(@PathVariable long id) {
 
 		return new ResponseEntity<>(userService.findUserById(id), HttpStatus.FOUND);
@@ -39,6 +41,7 @@ public class UserController {
 	}
 
 	@PostMapping("/signup")
+	@ResponseStatus(code = HttpStatus.CREATED)
 	public ResponseEntity<String> createUser(@RequestBody @Valid UserCreateModel userCreateModel) {
 
 		return new ResponseEntity<>(userService.createUser(userCreateModel), HttpStatus.CREATED);

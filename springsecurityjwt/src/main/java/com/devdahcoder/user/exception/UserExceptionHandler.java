@@ -32,12 +32,12 @@ public class UserExceptionHandler {
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(UserNotFoundException.class)
-	public ResponseEntity<Object> userNotFoundExceptionHandler(UserException userException) {
+	public ResponseEntity<Object> userNotFoundExceptionHandler(UserNotFoundException userException) {
 
 		UserExceptionResponse userExceptionResponse = new UserExceptionResponse(
 				userException.getMessage(),
-				userException.getCause(),
 				HttpStatus.NOT_FOUND,
+				HttpStatus.NOT_FOUND.value(),
 				ZonedDateTime.now(ZoneId.of("Z")
 				)
 		);
@@ -47,13 +47,13 @@ public class UserExceptionHandler {
 	}
 
 	@ResponseStatus(HttpStatus.CONFLICT)
-	@ExceptionHandler(UserException.class)
-	public ResponseEntity<Object> userAlreadyExistHandler(UserException userException) {
+	@ExceptionHandler(UserAlreadyExistException.class)
+	public ResponseEntity<Object> userAlreadyExistHandler(UserAlreadyExistException userException) {
 
 		UserExceptionResponse userExceptionResponse = new UserExceptionResponse(
 				userException.getMessage(),
-				userException.getCause(),
 				HttpStatus.CONFLICT,
+				HttpStatus.CONFLICT.value(),
 				ZonedDateTime.now(ZoneId.of("Z"))
 				);
 
