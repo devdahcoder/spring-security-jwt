@@ -1,5 +1,6 @@
 package com.devdahcoder.configuration.security.provider;
 
+import com.devdahcoder.user.repository.UserRepository;
 import com.devdahcoder.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -15,13 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class BasicAuthenticationProvider implements AuthenticationProvider {
 
-	private final UserService userService;
+	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public BasicAuthenticationProvider(UserService userService, PasswordEncoder passwordEncoder) {
+	public BasicAuthenticationProvider(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
-		this.userService = userService;
+		this.userRepository = userRepository;
 
 		this.passwordEncoder = passwordEncoder;
 
@@ -34,7 +35,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 
 		String password = authentication.getCredentials().toString();
 
-		UserDetails userDetails = userService.loadUserByUsername(username);
+		UserDetails userDetails = userRepository.loadUserByUsername(username);
 
 		return authenticationCheck(userDetails, password, passwordEncoder);
 

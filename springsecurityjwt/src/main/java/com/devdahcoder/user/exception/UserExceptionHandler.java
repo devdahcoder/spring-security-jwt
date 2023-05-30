@@ -1,11 +1,14 @@
 package com.devdahcoder.user.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +17,7 @@ public class UserExceptionHandler {
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public Map<String, String> exceptionValidationHandler(MethodArgumentNotValidException methodArgumentNotValidException) {
+	public Map<String, String> userCreateValidationHandler(MethodArgumentNotValidException methodArgumentNotValidException) {
 
 		Map<String, String> errors = new HashMap<>();
 
@@ -29,14 +32,43 @@ public class UserExceptionHandler {
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(UserNotFoundException.class)
-	public Map<String, String> userNotFoundException(UserNotFoundException userException) {
+	public ResponseEntity<Object> userNotFoundExceptionHandler(UserException userException) {
 
-		Map<String, String> error = new HashMap<>();
+		UserExceptionResponse userExceptionResponse = new UserExceptionResponse(
+				userException.getMessage(),
+				userException.getCause(),
+				HttpStatus.NOT_FOUND,
+				ZonedDateTime.now(ZoneId.of("Z")
+				)
+		);
 
-		error.put("error: ", userException.getMessage());
-
-		return error;
+		return new ResponseEntity<>(userExceptionResponse, HttpStatus.NOT_FOUND);
 
 	}
+
+	@ResponseStatus(HttpStatus.CONFLICT)
+	@ExceptionHandler(UserException.class)
+	public ResponseEntity<Object> userAlreadyExistHandler(UserException userException) {
+
+		UserExceptionResponse userExceptionResponse = new UserExceptionResponse(
+				userException.getMessage(),
+				userException.getCause(),
+				HttpStatus.CONFLICT,
+				ZonedDateTime.now(ZoneId.of("Z"))
+				);
+
+		return new ResponseEntity<>(userExceptionResponse, HttpStatus.CONFLICT);
+
+	}
+
+//	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//	@ExceptionHandler(UserException.class)
+//	public ResponseEntity<Object> userServerExceptionHandler(UserException userException) {
+//
+//		UserExceptionResponse userExceptionResponse = new UserExceptionResponse(userException.getMessage(), userException.getCause(), HttpStatus.INTERNAL_SERVER_ERROR, ZonedDateTime.now(ZoneId.of("Z")));
+//
+//		return new ResponseEntity<>(userExceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+//
+//	}
 
 }

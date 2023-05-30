@@ -2,7 +2,6 @@ package com.devdahcoder.user.repository;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
-import com.devdahcoder.user.exception.UserNotFoundException;
 import com.devdahcoder.user.extractor.UserResponseExtractor;
 import com.devdahcoder.user.mapper.UserResponseRowMapper;
 import com.devdahcoder.user.mapper.UserRowMapper;
@@ -11,16 +10,13 @@ import com.devdahcoder.user.model.UserDetailsModel;
 import com.devdahcoder.user.model.UserModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class UserRepository implements UserDetailsService, UserDetailsManagerContract {
@@ -61,6 +57,23 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	}
 
+	public UserResponseModel findUserById(long id) {
+
+		String sqlQuery = "select * from school.user where id = ?";
+
+		return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), id);
+
+	}
+
+	@Override
+	public UserResponseModel findUserByUsername(String username) {
+
+		String sqlQuery = "select * from user where username = ?";
+
+		return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), username);
+
+	}
+
 	@Override
 	public String createUser(UserCreateModel userCreateModel) {
 
@@ -73,23 +86,6 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 		return result == 1 ? userCreateModel.getUsername() : "Not created";
 
 	}
-
-	public UserResponseModel findUserById(long id) throws SQLException {
-
-		try {
-
-			String sqlQuery = "select * from user where id = ?";
-
-			return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), id);
-
-		} catch (DataAccessException ex) {
-
-			throw new UserNotFoundException("User not found with id: " + id);
-
-		}
-
-	}
-
 
 	public void updateUser(UserDetails user) {
 
@@ -104,7 +100,13 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	}
 
 	public boolean userExists(String username) {
-		return false;
+
+		String sqlQuery = "select count(*) from school.user where username = ?";
+
+		int queryResult = jdbcTemplate.queryForObject(sqlQuery, new Object[] { username }, Integer.class);
+
+		return queryResult == 1;
+
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.devdahcoder.user.model;
 
+import java.util.Objects;
+
 public class UserResponseModel {
 
 	private Long id;
@@ -78,4 +80,32 @@ public class UserResponseModel {
 
 	}
 
+	@Override
+	public String toString() {
+
+		return "UserResponseModel{" +
+				"id=" + id +
+				", firstName='" + firstName + '\'' +
+				", lastName='" + lastName + '\'' +
+				", email='" + email + '\'' +
+				", username='" + username + '\'' +
+				'}';
+
+	}
+
+	@Override
+	public boolean equals(Object o) {
+
+		if (this == o) return true;
+		if (!(o instanceof UserResponseModel that)) return false;
+		return Objects.equals(getId(), that.getId()) && Objects.equals(getFirstName(), that.getFirstName()) && Objects.equals(getLastName(), that.getLastName()) && Objects.equals(getEmail(), that.getEmail()) && Objects.equals(getUsername(), that.getUsername());
+
+	}
+
+	@Override
+	public int hashCode() {
+
+		return Objects.hash(getId(), getFirstName(), getLastName(), getEmail(), getUsername());
+
+	}
 }

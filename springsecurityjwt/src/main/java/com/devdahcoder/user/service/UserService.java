@@ -1,24 +1,22 @@
 package com.devdahcoder.user.service;
 
-import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
-import com.devdahcoder.user.exception.UserNotFoundException;
+import com.devdahcoder.user.exception.UserException;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import com.devdahcoder.user.repository.UserRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class UserService implements UserDetailsService, UserDetailsManagerContract {
+public class UserService implements UserDetailsManagerContract {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -33,34 +31,73 @@ public class UserService implements UserDetailsService, UserDetailsManagerContra
 	}
 
 	@Override
-	public UserDetailsContract loadUserByUsername(String username) throws UsernameNotFoundException {
-
-		return userRepository.loadUserByUsername(username);
-
-	}
-
-	@Override
 	public List<UserResponseModel> findAllUsers() {
 
 		return userRepository.findAllUsers();
 
 	}
 
+	public UserResponseModel findUserById(long id) {
+
+		try {
+
+			return userRepository.findUserById(id);
+
+		} catch (EmptyResultDataAccessException ex) {
+
+			throw new UserException("User not found with id: " + id);
+
+		} catch (DataAccessException ex) {
+
+			throw new UserException("Something went wrong while retrieving your user data");
+
+		}
+
+	}
+
 	@Override
-	public String createUser(UserCreateModel userCreateModel) {
+	public UserResponseModel findUserByUsername(String username) throws EmptyResultDataAccessException, DataAccessException {
 
-		userCreateModel.setPassword(passwordEncoder.encode(userCreateModel.getPassword()));
+		try {
 
-		return userRepository.createUser(userCreateModel);
+			return userRepository.findUserByUsername(username);
+
+		} catch (EmptyResultDataAccessException ex) {
+
+			throw new UserException("User not found with username: " + username);
+
+		} catch (DataAccessException ex) {
+
+			throw new RuntimeException("Something went wrong while retrieving your user data");
+
+		}
 
 	}
 
-	public UserResponseModel findUserById(long id) throws UserNotFoundException, SQLException {
+	@Override
+	public String createUser(@NotNull UserCreateModel userCreateModel) {
 
-		return userRepository.findUserById(id);
+		try {
+
+			userCreateModel.setPassword(passwordEncoder.encode(userCreateModel.getPassword()));
+
+			boolean userExists  = userRepository.userExists(userCreateModel.getUsername());
+
+			if (userExists) {
+
+				throw new UserException("User Already exist");
+
+			}
+
+			return userRepository.createUser(userCreateModel);
+
+		} catch (DataAccessException ex) {
+
+			throw new RuntimeException(ex);
+
+		}
 
 	}
-
 
 	public void updateUser(UserDetails user) {
 
