@@ -12,6 +12,8 @@ import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserDetailsModel;
 import com.devdahcoder.user.model.UserModel;
 import com.devdahcoder.user.model.UserResponseModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -25,6 +27,8 @@ import java.util.List;
 
 @Repository
 public class UserRepository implements UserDetailsService, UserDetailsManagerContract {
+
+	private final Logger logger = LoggerFactory.getLogger(UserRepository.class);
 
 	private final JdbcTemplate jdbcTemplate;
 
@@ -128,6 +132,7 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	}
 
+	@Override
 	public boolean userExists(String username) {
 
 		try {
@@ -145,6 +150,8 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 			return false;
 
 		} catch (DataAccessException ex) {
+
+			logger.error("Something went wrong while trying to check if user exist");
 
 			throw new UserException("Something went wrong while retrieving user data");
 

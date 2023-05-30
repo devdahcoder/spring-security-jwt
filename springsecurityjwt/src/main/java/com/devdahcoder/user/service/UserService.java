@@ -1,23 +1,24 @@
 package com.devdahcoder.user.service;
 
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
-import com.devdahcoder.user.exception.UserException;
-import com.devdahcoder.user.exception.UserNotFoundException;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import com.devdahcoder.user.repository.UserRepository;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 public class UserService implements UserDetailsManagerContract {
+
+	private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -52,6 +53,7 @@ public class UserService implements UserDetailsManagerContract {
 	}
 
 	@Override
+	@Transactional
 	public String createUser(@NotNull UserCreateModel userCreateModel) {
 
 		userCreateModel.setPassword(passwordEncoder.encode(userCreateModel.getPassword()));
@@ -74,8 +76,11 @@ public class UserService implements UserDetailsManagerContract {
 
 	}
 
+	@Override
 	public boolean userExists(String username) {
-		return false;
+
+		return userRepository.userExists(username);
+
 	}
 
 }

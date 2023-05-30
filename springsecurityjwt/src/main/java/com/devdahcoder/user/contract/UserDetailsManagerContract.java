@@ -15,6 +15,8 @@ public interface UserDetailsManagerContract {
 
 	public UserResponseModel findUserByUsername(String username) throws SQLException;
 
+	public boolean userExists(String username);
+
 //	public Optional<UserResponseModel> findUserById(long id);
 
 }
