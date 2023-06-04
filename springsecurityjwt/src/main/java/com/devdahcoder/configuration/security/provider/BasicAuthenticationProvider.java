@@ -1,7 +1,7 @@
 package com.devdahcoder.configuration.security.provider;
 
 import com.devdahcoder.user.repository.UserRepository;
-import com.devdahcoder.user.service.UserService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -43,7 +43,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 
 	private Authentication authenticationCheck(UserDetails userDetails, String password, PasswordEncoder passwordEncoder) {
 
-		if (passwordEncoder.matches(password, userDetails.getPassword())) {
+		if (this.checkPasswordVerification(userDetails, password, passwordEncoder)) {
 
 			return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDetails.getPassword(), userDetails.getAuthorities());
 
@@ -52,6 +52,12 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 			throw new BadCredentialsException("Bad credentials");
 
 		}
+
+	}
+
+	public boolean checkPasswordVerification(@NotNull UserDetails userDetails, String password, @NotNull PasswordEncoder passwordEncoder) {
+
+		return passwordEncoder.matches(password, userDetails.getPassword());
 
 	}
 

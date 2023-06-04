@@ -1,4 +1,4 @@
-package com.devdahcoder.user.exception;
+package com.devdahcoder.exception.user;
 
 import org.springframework.http.HttpStatus;
 

@@ -35,11 +35,15 @@ public class UserService implements UserDetailsManagerContract {
 	@Override
 	public List<UserResponseModel> findAllUsers() {
 
+		logger.info("Service: finding all users");
+
 		return userRepository.findAllUsers();
 
 	}
 
 	public UserResponseModel findUserById(long id) {
+
+		logger.info("Service: finding user by id");
 
 		return userRepository.findUserById(id);
 
@@ -48,6 +52,8 @@ public class UserService implements UserDetailsManagerContract {
 	@Override
 	public UserResponseModel findUserByUsername(String username) {
 
+		logger.info("Service: finding user by username");
+
 		return userRepository.findUserByUsername(username);
 
 	}
@@ -55,6 +61,8 @@ public class UserService implements UserDetailsManagerContract {
 	@Override
 	@Transactional
 	public String createUser(@NotNull UserCreateModel userCreateModel) {
+
+		logger.info("Service: creating a new user");
 
 		userCreateModel.setPassword(passwordEncoder.encode(userCreateModel.getPassword()));
 

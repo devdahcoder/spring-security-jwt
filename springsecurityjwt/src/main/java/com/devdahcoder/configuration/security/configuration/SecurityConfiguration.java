@@ -30,7 +30,7 @@ public class SecurityConfiguration {
 		return httpSecurity
 				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth ->
-						auth.anyRequest().authenticated()
+						auth.anyRequest().permitAll()
 				)
 				.httpBasic(Customizer.withDefaults())
 				.build();

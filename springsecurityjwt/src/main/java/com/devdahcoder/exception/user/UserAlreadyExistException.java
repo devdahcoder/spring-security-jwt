@@ -1,4 +1,4 @@
-package com.devdahcoder.user.exception;
+package com.devdahcoder.exception.user;
 
 public class UserAlreadyExistException extends RuntimeException {
 

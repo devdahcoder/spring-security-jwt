@@ -2,9 +2,9 @@ package com.devdahcoder.user.repository;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
-import com.devdahcoder.user.exception.UserAlreadyExistException;
-import com.devdahcoder.user.exception.UserException;
-import com.devdahcoder.user.exception.UserNotFoundException;
+import com.devdahcoder.exception.user.UserAlreadyExistException;
+import com.devdahcoder.exception.user.UserException;
+import com.devdahcoder.exception.user.UserNotFoundException;
 import com.devdahcoder.user.extractor.UserResponseExtractor;
 import com.devdahcoder.user.mapper.UserResponseRowMapper;
 import com.devdahcoder.user.mapper.UserRowMapper;
@@ -60,9 +60,19 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	@Override
 	public List<UserResponseModel> findAllUsers() {
 
-		String sqlQuery = "select * from school.user";
+		try {
 
-		return jdbcTemplate.query(sqlQuery, new UserResponseExtractor());
+			String sqlQuery = "select * from school.user";
+
+			return jdbcTemplate.query(sqlQuery, new UserResponseExtractor());
+
+		} catch (DataAccessException ex) {
+
+			logger.error("Something went wrong while retrieving users", ex);
+
+			throw new UserException("Something went wrong while retrieving users");
+
+		}
 
 	}
 
