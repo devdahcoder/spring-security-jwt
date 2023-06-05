@@ -108,4 +108,5 @@ public class UserResponseModel {
 		return Objects.hash(getId(), getFirstName(), getLastName(), getEmail(), getUsername());
 
 	}
+
 }

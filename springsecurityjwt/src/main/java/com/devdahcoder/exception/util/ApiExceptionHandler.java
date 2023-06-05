@@ -1,5 +1,8 @@
-package com.devdahcoder.exception.user;
+package com.devdahcoder.exception.util;
 
+import com.devdahcoder.exception.api.ApiAlreadyExistException;
+import com.devdahcoder.exception.api.ApiNotFoundException;
+import com.devdahcoder.exception.api.model.ApiExceptionResponseModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,11 +16,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class UserExceptionHandler {
+public class ApiExceptionHandler {
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public Map<String, String> userCreateValidationHandler(MethodArgumentNotValidException methodArgumentNotValidException) {
+	public Map<String, String> getCreateValidationHandler(MethodArgumentNotValidException methodArgumentNotValidException) {
 
 		Map<String, String> errors = new HashMap<>();
 
@@ -31,11 +34,11 @@ public class UserExceptionHandler {
 	}
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)
-	@ExceptionHandler(UserNotFoundException.class)
-	public ResponseEntity<Object> userNotFoundExceptionHandler(UserNotFoundException userException) {
+	@ExceptionHandler(ApiNotFoundException.class)
+	public ResponseEntity<Object> getNotFoundExceptionHandler(ApiNotFoundException apiNotFoundException) {
 
-		UserExceptionResponse userExceptionResponse = new UserExceptionResponse(
-				userException.getMessage(),
+		ApiExceptionResponseModel userExceptionResponse = new ApiExceptionResponseModel(
+				apiNotFoundException.getMessage(),
 				HttpStatus.NOT_FOUND,
 				HttpStatus.NOT_FOUND.value(),
 				ZonedDateTime.now(ZoneId.of("Z")
@@ -47,11 +50,11 @@ public class UserExceptionHandler {
 	}
 
 	@ResponseStatus(HttpStatus.CONFLICT)
-	@ExceptionHandler(UserAlreadyExistException.class)
-	public ResponseEntity<Object> userAlreadyExistHandler(UserAlreadyExistException userException) {
+	@ExceptionHandler(ApiAlreadyExistException.class)
+	public ResponseEntity<Object> getAlreadyExistHandler(ApiAlreadyExistException apiAlreadyExistException) {
 
-		UserExceptionResponse userExceptionResponse = new UserExceptionResponse(
-				userException.getMessage(),
+		ApiExceptionResponseModel userExceptionResponse = new ApiExceptionResponseModel(
+				apiAlreadyExistException.getMessage(),
 				HttpStatus.CONFLICT,
 				HttpStatus.CONFLICT.value(),
 				ZonedDateTime.now(ZoneId.of("Z"))

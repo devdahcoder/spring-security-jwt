@@ -2,9 +2,9 @@ package com.devdahcoder.user.repository;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
-import com.devdahcoder.exception.user.UserAlreadyExistException;
-import com.devdahcoder.exception.user.UserException;
-import com.devdahcoder.exception.user.UserNotFoundException;
+import com.devdahcoder.exception.api.ApiAlreadyExistException;
+import com.devdahcoder.exception.api.ApiException;
+import com.devdahcoder.exception.api.ApiNotFoundException;
 import com.devdahcoder.user.extractor.UserResponseExtractor;
 import com.devdahcoder.user.mapper.UserResponseRowMapper;
 import com.devdahcoder.user.mapper.UserRowMapper;
@@ -17,12 +17,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+import org.springframework.jdbc.IncorrectResultSetColumnCountException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @Repository
@@ -56,7 +61,6 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	}
 
-
 	@Override
 	public List<UserResponseModel> findAllUsers() {
 
@@ -66,11 +70,27 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 			return jdbcTemplate.query(sqlQuery, new UserResponseExtractor());
 
+		} catch (BadSqlGrammarException ex) {
+
+			throw new BadSqlGrammarException("findAllUsers", ex.getSql(), (SQLException) ex.getRootCause());
+
+		} catch (IncorrectResultSizeDataAccessException ex) {
+
+			throw new IncorrectResultSizeDataAccessException(ex.getActualSize(), ex.getExpectedSize());
+
+		} catch (IncorrectResultSetColumnCountException ex) {
+
+			throw new IncorrectResultSetColumnCountException(ex.getExpectedCount(), ex.getActualCount());
+
+		} catch (CannotGetJdbcConnectionException ex) {
+
+			throw new CannotGetJdbcConnectionException("A connection to the database could not be made");
+
 		} catch (DataAccessException ex) {
 
 			logger.error("Something went wrong while retrieving users", ex);
 
-			throw new UserException("Something went wrong while retrieving users");
+			throw new ApiException("Something went wrong while retrieving users");
 
 		}
 
@@ -86,11 +106,11 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 		} catch (EmptyResultDataAccessException ex) {
 
-			throw new UserNotFoundException("User not found with id: " + id);
+			throw new ApiNotFoundException("User not found with id: " + id);
 
 		} catch (DataAccessException ex) {
 
-			throw new UserException("Something went wrong while retrieving your user data");
+			throw new ApiException("Something went wrong while retrieving your user data");
 
 		}
 
@@ -107,11 +127,11 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 		} catch (EmptyResultDataAccessException ex) {
 
-			throw new UserNotFoundException("User not found with username: " + username);
+			throw new ApiNotFoundException("User not found with username: " + username);
 
 		} catch (DataAccessException ex) {
 
-			throw new UserException("Something went wrong while retrieving your user data");
+			throw new ApiException("Something went wrong while retrieving your user data");
 
 		}
 
@@ -151,11 +171,15 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 			int queryResult = jdbcTemplate.queryForObject(sqlQuery, new Object[] { username }, Integer.class);
 
+			logger.info("Completed user exist query");
+
 			if (queryResult > 0) {
 
-				throw new UserAlreadyExistException("User Already exist");
+				throw new ApiAlreadyExistException("User Already exist");
 
 			}
+
+			logger.info("Returning user exist query result");
 
 			return false;
 
@@ -163,7 +187,7 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 			logger.error("Something went wrong while trying to check if user exist");
 
-			throw new UserException("Something went wrong while retrieving user data");
+			throw new ApiException("Something went wrong while retrieving user data");
 
 		}
 

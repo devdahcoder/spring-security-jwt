@@ -1,4 +1,4 @@
-package com.devdahcoder.user.model;
+package com.devdahcoder.otp.model;
 
 import java.util.Objects;
 

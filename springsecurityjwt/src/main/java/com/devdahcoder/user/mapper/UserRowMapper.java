@@ -9,16 +9,16 @@ import java.sql.SQLException;
 public class UserRowMapper implements RowMapper<UserModel> {
 
 	@Override
-	public UserModel mapRow(ResultSet rs, int rowNum) throws SQLException {
+	public UserModel mapRow(ResultSet resultSet, int rowNum) throws SQLException {
 
 		UserModel userModel = new UserModel();
 
-		userModel.setId(rs.getLong("id"));
-		userModel.setFirstName(rs.getString("firstName"));
-		userModel.setLastName((rs.getString("lastName")));
-		userModel.setPassword(rs.getString("password"));
-		userModel.setEmail(rs.getString("email"));
-		userModel.setUsername(rs.getString("username"));
+		userModel.setId(resultSet.getLong("id"));
+		userModel.setFirstName(resultSet.getString("firstName"));
+		userModel.setLastName((resultSet.getString("lastName")));
+		userModel.setPassword(resultSet.getString("password"));
+		userModel.setEmail(resultSet.getString("email"));
+		userModel.setUsername(resultSet.getString("username"));
 
 		return userModel;
 
