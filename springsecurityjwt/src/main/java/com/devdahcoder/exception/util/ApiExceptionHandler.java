@@ -1,6 +1,7 @@
 package com.devdahcoder.exception.util;
 
 import com.devdahcoder.exception.api.ApiAlreadyExistException;
+import com.devdahcoder.exception.api.ApiException;
 import com.devdahcoder.exception.api.ApiNotFoundException;
 import com.devdahcoder.exception.api.model.ApiExceptionResponseModel;
 import org.springframework.http.HttpStatus;
@@ -64,14 +65,20 @@ public class ApiExceptionHandler {
 
 	}
 
-//	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//	@ExceptionHandler(UserException.class)
-//	public ResponseEntity<Object> userServerExceptionHandler(UserException userException) {
-//
-//		UserExceptionResponse userExceptionResponse = new UserExceptionResponse(userException.getMessage(), userException.getCause(), HttpStatus.INTERNAL_SERVER_ERROR, ZonedDateTime.now(ZoneId.of("Z")));
-//
-//		return new ResponseEntity<>(userExceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-//
-//	}
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	@ExceptionHandler(ApiException.class)
+	public ResponseEntity<Object> userServerExceptionHandler(ApiException apiException) {
+
+		ApiExceptionResponseModel userExceptionResponse = new ApiExceptionResponseModel(
+				apiException.getMessage(),
+				HttpStatus.INTERNAL_SERVER_ERROR,
+				HttpStatus.INTERNAL_SERVER_ERROR.value(),
+				ZonedDateTime.now(ZoneId.of("Z")
+				)
+		);
+
+		return new ResponseEntity<>(userExceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+
+	}
 
 }

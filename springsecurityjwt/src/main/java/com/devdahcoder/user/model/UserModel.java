@@ -3,13 +3,14 @@ package com.devdahcoder.user.model;
 import com.devdahcoder.user.contract.UserDetailsContract;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class UserModel implements UserDetailsContract {
 
 	private Long id;
+	private UUID userId;
 	private String firstName;
 	private String lastName;
 	private String username;
@@ -20,14 +21,16 @@ public class UserModel implements UserDetailsContract {
 
 	public UserModel() {}
 
-	public UserModel(Long id, String firstName, String lastName, String username, String email, String pwdAlgo, String password) {
+	public UserModel(Long id, UUID userId, String firstName, String lastName, String username, String email, String pwdAlgo, String password, List<GrantedAuthority> authorities) {
 		this.id = id;
+		this.userId = userId;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.username = username;
 		this.email = email;
 		this.pwdAlgo = pwdAlgo;
 		this.password = password;
+		this.authorities = authorities;
 	}
 
 	public Long getId() {
@@ -39,6 +42,18 @@ public class UserModel implements UserDetailsContract {
 	public void setId(Long id) {
 
 		this.id = id;
+
+	}
+
+	public UUID getUserId() {
+
+		return userId;
+
+	}
+
+	public void setUserId(UUID userId) {
+
+		this.userId = userId;
 
 	}
 
@@ -105,8 +120,8 @@ public class UserModel implements UserDetailsContract {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
+
 		return List.of(() -> "delete");
-//		return this.authorities;
 
 	}
 

@@ -1,8 +1,9 @@
 package com.devdahcoder.user.repository;
 
+import com.devdahcoder.exception.database.BadSqlQueryException;
+import com.devdahcoder.exception.database.DatabaseDuplicateKeyException;
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
-import com.devdahcoder.exception.api.ApiAlreadyExistException;
 import com.devdahcoder.exception.api.ApiException;
 import com.devdahcoder.exception.api.ApiNotFoundException;
 import com.devdahcoder.user.extractor.UserResponseExtractor;
@@ -12,22 +13,25 @@ import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserDetailsModel;
 import com.devdahcoder.user.model.UserModel;
 import com.devdahcoder.user.model.UserResponseModel;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.dao.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.IncorrectResultSetColumnCountException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.List;
 
 @Repository
@@ -37,10 +41,14 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	private final JdbcTemplate jdbcTemplate;
 
+	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
 	@Autowired
-	public UserRepository(JdbcTemplate jdbcTemplate) {
+	public UserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 
 		this.jdbcTemplate = jdbcTemplate;
+
+		this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
 
 	}
 
@@ -68,9 +76,11 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 			String sqlQuery = "select * from school.user";
 
-			return jdbcTemplate.query(sqlQuery, new UserResponseExtractor());
+			return namedParameterJdbcTemplate.query(sqlQuery, new UserResponseExtractor());
 
 		} catch (BadSqlGrammarException ex) {
+
+			logger.error("Bad SQL grammar exception occurred error executing database query: {}", ex.getSql());
 
 			throw new BadSqlGrammarException("findAllUsers", ex.getSql(), (SQLException) ex.getRootCause());
 
@@ -138,15 +148,59 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	}
 
 	@Override
-	public String createUser(UserCreateModel userCreateModel) {
+	public String createUser(@NotNull UserCreateModel userCreateModel) {
 
-		String sqlQuery = "insert into school.user (firstName, lastName, email, username, password) values (?, ?, ?, ?, ?)";
+		final String sqlQuery = "INSERT INTO school.user (userId, firstName, lastName, username, email, password) VALUES (:userId, :firstName, :lastName, :username, :email, :password)";
 
-		Object[] objects = { userCreateModel.getFirstName(), userCreateModel.getLastName(), userCreateModel.getEmail(), userCreateModel.getUsername(), userCreateModel.getPassword()};
+		final String userCreationErrorMessage = "Something went wrong while trying to create a new user";
 
-		int result = jdbcTemplate.update(sqlQuery, objects);
+		final String userDuplicateKeyMessage = "A constraint column in the database cannot be duplicated when creating a new user";
 
-		return result == 1 ? userCreateModel.getUsername() : "Not created";
+		final String userBadSqlGrammarMessage = "Bad sql grammar, there was an issue with the sql query " + sqlQuery;
+
+		try {
+
+			SqlParameterSource createUserSqlParam = new MapSqlParameterSource()
+					.addValue("userId", userCreateModel.getUserId())
+					.addValue("firstName", userCreateModel.getFirstName())
+					.addValue("lastName", userCreateModel.getLastName())
+					.addValue("username", userCreateModel.getUsername())
+					.addValue("email", userCreateModel.getEmail())
+					.addValue("password", userCreateModel.getPassword());
+
+			int queryResult = namedParameterJdbcTemplate.update(sqlQuery, createUserSqlParam);
+
+			if (queryResult == 1) {
+
+				return userCreateModel.getUsername();
+
+			} else {
+
+				throw new ApiException(userCreationErrorMessage);
+
+			}
+
+		} catch (BadSqlGrammarException ex ) {
+
+			logger.isDebugEnabled();
+
+			logger.error(userBadSqlGrammarMessage);
+
+			throw new BadSqlQueryException("createUser", sqlQuery, ex.getSQLException());
+
+		} catch (DataIntegrityViolationException ex) {
+
+			logger.error(userDuplicateKeyMessage);
+
+			throw new DatabaseDuplicateKeyException(userDuplicateKeyMessage, ex);
+
+		} catch (DataAccessException ex) {
+
+			logger.error(userCreationErrorMessage);
+
+			throw new ApiException(userCreationErrorMessage, ex);
+
+		}
 
 	}
 
@@ -171,17 +225,9 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 			int queryResult = jdbcTemplate.queryForObject(sqlQuery, new Object[] { username }, Integer.class);
 
-			logger.info("Completed user exist query");
+			logger.info("Completed user exist query now returning user exist query result");
 
-			if (queryResult > 0) {
-
-				throw new ApiAlreadyExistException("User Already exist");
-
-			}
-
-			logger.info("Returning user exist query result");
-
-			return false;
+			return queryResult > 0;
 
 		} catch (DataAccessException ex) {
 

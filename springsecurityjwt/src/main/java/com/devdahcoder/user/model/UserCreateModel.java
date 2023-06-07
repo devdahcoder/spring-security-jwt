@@ -4,9 +4,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class UserCreateModel {
 
+	private UUID userId;
 	@NotBlank( message = "Firstname cannot be empty" )
 	private String firstName;
 	@NotBlank( message = "Lastname cannot be empty" )
@@ -19,9 +21,7 @@ public class UserCreateModel {
 	@NotBlank( message = "Password cannot be empty" )
 	private String password;
 
-	public UserCreateModel() {
-
-	}
+	public UserCreateModel() {}
 
 	public UserCreateModel(String firstName, String lastName, String email, String username, String password) {
 		this.firstName = firstName;
@@ -91,11 +91,25 @@ public class UserCreateModel {
 
 	}
 
+	public void generateUserId() {
+
+		this.userId = UUID.randomUUID();
+
+	}
+
+	public String getUserId() {
+
+		return userId.toString();
+
+	}
+
 	@Override
 	public boolean equals(Object o) {
 
 		if (this == o) return true;
+
 		if (!(o instanceof UserCreateModel that)) return false;
+
 		return Objects.equals(getFirstName(), that.getFirstName()) && Objects.equals(getLastName(), that.getLastName()) && Objects.equals(getEmail(), that.getEmail()) && Objects.equals(getUsername(), that.getUsername()) && Objects.equals(getPassword(), that.getPassword());
 
 	}

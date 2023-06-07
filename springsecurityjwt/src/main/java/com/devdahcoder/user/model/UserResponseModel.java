@@ -5,6 +5,7 @@ import java.util.Objects;
 public class UserResponseModel {
 
 	private Long id;
+	private String userId;
 	private String firstName;
 	private String lastName;
 	private String email;
@@ -12,8 +13,9 @@ public class UserResponseModel {
 
 	public UserResponseModel() {}
 
-	public UserResponseModel(Long id, String firstName, String lastName, String email, String username) {
+	public UserResponseModel(Long id, String userId, String firstName, String lastName, String email, String username) {
 		this.id = id;
+		this.userId = userId;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
@@ -29,6 +31,18 @@ public class UserResponseModel {
 	public void setId(Long id) {
 
 		this.id = id;
+
+	}
+
+	public String getUserId() {
+
+		return userId;
+
+	}
+
+	public void setUserId(String userId) {
+
+		this.userId = userId;
 
 	}
 
@@ -85,6 +99,7 @@ public class UserResponseModel {
 
 		return "UserResponseModel{" +
 				"id=" + id +
+				", userId=" + userId +
 				", firstName='" + firstName + '\'' +
 				", lastName='" + lastName + '\'' +
 				", email='" + email + '\'' +
@@ -98,15 +113,14 @@ public class UserResponseModel {
 
 		if (this == o) return true;
 		if (!(o instanceof UserResponseModel that)) return false;
-		return Objects.equals(getId(), that.getId()) && Objects.equals(getFirstName(), that.getFirstName()) && Objects.equals(getLastName(), that.getLastName()) && Objects.equals(getEmail(), that.getEmail()) && Objects.equals(getUsername(), that.getUsername());
+		return Objects.equals(getId(), that.getId()) && Objects.equals(getUserId(), that.getUserId()) && Objects.equals(getFirstName(), that.getFirstName()) && Objects.equals(getLastName(), that.getLastName()) && Objects.equals(getEmail(), that.getEmail()) && Objects.equals(getUsername(), that.getUsername());
 
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(getId(), getFirstName(), getLastName(), getEmail(), getUsername());
+		return Objects.hash(getId(), getUserId(), getFirstName(), getLastName(), getEmail(), getUsername());
 
 	}
-
 }
