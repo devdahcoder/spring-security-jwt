@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.naming.AuthenticationException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -59,7 +60,7 @@ public class ApiExceptionHandler {
 				HttpStatus.CONFLICT,
 				HttpStatus.CONFLICT.value(),
 				ZonedDateTime.now(ZoneId.of("Z"))
-				);
+		);
 
 		return new ResponseEntity<>(userExceptionResponse, HttpStatus.CONFLICT);
 
@@ -67,17 +68,31 @@ public class ApiExceptionHandler {
 
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(ApiException.class)
-	public ResponseEntity<Object> userServerExceptionHandler(ApiException apiException) {
+	public ResponseEntity<Object> getServerExceptionHandler(ApiException apiException) {
 
 		ApiExceptionResponseModel userExceptionResponse = new ApiExceptionResponseModel(
 				apiException.getMessage(),
 				HttpStatus.INTERNAL_SERVER_ERROR,
 				HttpStatus.INTERNAL_SERVER_ERROR.value(),
-				ZonedDateTime.now(ZoneId.of("Z")
-				)
+				ZonedDateTime.now(ZoneId.of("Z"))
 		);
 
 		return new ResponseEntity<>(userExceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+
+	}
+
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<Object> getUnAuthorisedExceptionHandler(AuthenticationException authenticationException) {
+
+		ApiExceptionResponseModel apiExceptionResponseModel = new ApiExceptionResponseModel(
+				authenticationException.getMessage(),
+				HttpStatus.UNAUTHORIZED,
+				HttpStatus.UNAUTHORIZED.value(),
+				ZonedDateTime.now(ZoneId.of("Z"))
+		);
+
+		return new ResponseEntity<>(apiExceptionResponseModel, HttpStatus.UNAUTHORIZED);
 
 	}
 

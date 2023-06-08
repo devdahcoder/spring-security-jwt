@@ -1,16 +1,24 @@
 package com.devdahcoder.exception.api;
 
-public class ApiNotFoundException extends RuntimeException {
+import org.springframework.dao.EmptyResultDataAccessException;
 
-    public ApiNotFoundException(String message) {
+public class ApiNotFoundException extends EmptyResultDataAccessException {
 
-        super(message);
+    public ApiNotFoundException(int expectedSize) {
+
+        super(expectedSize);
 
     }
 
-    public ApiNotFoundException(String message, Throwable cause) {
+    public ApiNotFoundException(String msg, int expectedSize) {
 
-        super(message, cause);
+        super(msg, expectedSize);
+
+    }
+
+    public ApiNotFoundException(String msg, int expectedSize, Throwable ex) {
+
+        super(msg, expectedSize, ex);
 
     }
 

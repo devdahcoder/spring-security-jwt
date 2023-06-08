@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -34,9 +35,9 @@ public class UserController {
 
 	@GetMapping("/{id}")
 	@ResponseStatus(code = HttpStatus.FOUND)
-	public ResponseEntity<UserResponseModel> findUserById(@PathVariable long id) {
+	public ResponseEntity<UserResponseModel> findUserById(@PathVariable UUID userId) {
 
-		return new ResponseEntity<>(userService.findUserById(id), HttpStatus.FOUND);
+		return new ResponseEntity<>(userService.findUserById(userId), HttpStatus.FOUND);
 
 	}
 

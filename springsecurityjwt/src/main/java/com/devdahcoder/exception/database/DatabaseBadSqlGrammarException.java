@@ -4,7 +4,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 
 import java.sql.SQLException;
 
-public class BadSqlQueryException extends BadSqlGrammarException {
+public class DatabaseBadSqlGrammarException extends BadSqlGrammarException {
     /**
      * Constructor for BadSqlGrammarException.
      *
@@ -12,7 +12,7 @@ public class BadSqlQueryException extends BadSqlGrammarException {
      * @param sql  the offending SQL statement
      * @param ex   the root cause
      */
-    public BadSqlQueryException(String task, String sql, SQLException ex) {
+    public DatabaseBadSqlGrammarException(String task, String sql, SQLException ex) {
 
         super(task, sql, ex);
 

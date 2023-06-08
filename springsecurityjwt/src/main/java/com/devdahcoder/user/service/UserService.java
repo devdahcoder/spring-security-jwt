@@ -1,10 +1,7 @@
 package com.devdahcoder.user.service;
 
 import com.devdahcoder.exception.api.ApiAlreadyExistException;
-import com.devdahcoder.otp.model.OtpModel;
 import com.devdahcoder.otp.repository.OtpRepository;
-import com.devdahcoder.otp.util.GenerateOtpUtil;
-import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
@@ -13,13 +10,12 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsManagerContract {
@@ -49,11 +45,11 @@ public class UserService implements UserDetailsManagerContract {
 
 	}
 
-	public UserResponseModel findUserById(long id) {
+	public UserResponseModel findUserById(UUID userId) {
 
 		logger.info("Service: finding user by id");
 
-		return userRepository.findUserById(id);
+		return userRepository.findUserById(userId);
 
 	}
 
@@ -87,44 +83,6 @@ public class UserService implements UserDetailsManagerContract {
 
 	}
 
-//	private void userOtpAuthentication(@NotNull UserCreateModel userCreateModel) {
-//
-//		UserDetailsContract userDetailsContract = userRepository.loadUserByUsername(userCreateModel.getUsername());
-//
-//		if (userDetailsContract == null || !passwordEncoder.matches(userCreateModel.getPassword(), userDetailsContract.getPassword())) {
-//
-//			throw new BadCredentialsException("Bad credentials.");
-//
-//		}
-//
-//		userRenewOtp(userCreateModel);
-//
-//	}
-//
-//	private void userRenewOtp(@NotNull UserCreateModel userCreateModel) {
-//
-//		OtpModel otpModel = new OtpModel();
-//
-//		String code = GenerateOtpUtil.generateOtp();
-//
-//		boolean userOtp = otpRepository.otpExist(userCreateModel.getUsername());
-//
-//		if (userOtp) {
-//
-//			otpModel.setCode(code);
-//
-//		} else {
-//
-//			otpModel.setUsername(userCreateModel.getUsername());
-//
-//			otpModel.setCode(code);
-//
-//			otpRepository.createOtp(otpModel);
-//
-//		}
-//
-//	}
-
 	public void updateUser(UserDetails user) {
 
 	}
@@ -139,6 +97,8 @@ public class UserService implements UserDetailsManagerContract {
 
 	@Override
 	public boolean userExists(String username) {
+
+		logger.info("Service: checking if user existed");
 
 		return userRepository.userExists(username);
 

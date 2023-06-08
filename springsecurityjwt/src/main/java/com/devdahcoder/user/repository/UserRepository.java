@@ -1,7 +1,8 @@
 package com.devdahcoder.user.repository;
 
-import com.devdahcoder.exception.database.BadSqlQueryException;
-import com.devdahcoder.exception.database.DatabaseDuplicateKeyException;
+import com.devdahcoder.exception.database.DatabaseBadSqlGrammarException;
+import com.devdahcoder.exception.database.DatabaseIntegrityConstraintViolationException;
+import com.devdahcoder.exception.database.DatabaseTypeMismatchException;
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
 import com.devdahcoder.exception.api.ApiException;
@@ -21,7 +22,6 @@ import org.springframework.dao.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.IncorrectResultSetColumnCountException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -30,23 +30,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
-import java.sql.SQLSyntaxErrorException;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public class UserRepository implements UserDetailsService, UserDetailsManagerContract {
 
 	private final Logger logger = LoggerFactory.getLogger(UserRepository.class);
 
-	private final JdbcTemplate jdbcTemplate;
-
 	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	@Autowired
-	public UserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-
-		this.jdbcTemplate = jdbcTemplate;
+	public UserRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 
 		this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
 
@@ -55,26 +50,28 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	@Override
 	public UserDetailsContract loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		String sqlQuery = "select * from user where username = ?";
+		String sqlQuery = "select * from school.user where username = :username";
 
-		UserModel user = jdbcTemplate.queryForObject(sqlQuery, new UserRowMapper(), username);
+		final SqlParameterSource sqlParameterSource = new MapSqlParameterSource("username", username);
 
-		if (user == null) {
+		UserModel userExist = namedParameterJdbcTemplate.queryForObject(sqlQuery, sqlParameterSource, new UserRowMapper());
+
+		if (userExist == null) {
 
 			throw new UsernameNotFoundException("User not found");
 
 		}
 
-		return new UserDetailsModel(user);
+		return new UserDetailsModel(userExist);
 
 	}
 
 	@Override
 	public List<UserResponseModel> findAllUsers() {
 
-		try {
+		final String sqlQuery = "select * from school.user";
 
-			String sqlQuery = "select * from school.user";
+		try {
 
 			return namedParameterJdbcTemplate.query(sqlQuery, new UserResponseExtractor());
 
@@ -82,7 +79,7 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 			logger.error("Bad SQL grammar exception occurred error executing database query: {}", ex.getSql());
 
-			throw new BadSqlGrammarException("findAllUsers", ex.getSql(), (SQLException) ex.getRootCause());
+			throw new DatabaseBadSqlGrammarException("findAllUsers", ex.getSql(), ex.getSQLException());
 
 		} catch (IncorrectResultSizeDataAccessException ex) {
 
@@ -106,17 +103,35 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	}
 
-	public UserResponseModel findUserById(long id) {
+	public UserResponseModel findUserById(UUID userId) {
+
+		final String sqlQuery = "select * from school.user where userId = :userId";
+
+		final String userBadSqlGrammarMessage = "Bad sql grammar, there was an issue with the sql query " + sqlQuery;
+
+		SqlParameterSource findUserByIdSqlParam = new MapSqlParameterSource("userId", userId);
 
 		try {
 
-			String sqlQuery = "select * from school.user where id = ?";
+			return namedParameterJdbcTemplate.queryForObject(sqlQuery, findUserByIdSqlParam, new UserResponseRowMapper());
 
-			return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), id);
+		} catch (BadSqlGrammarException ex ) {
+
+			logger.error(userBadSqlGrammarMessage);
+
+			throw new DatabaseBadSqlGrammarException("findUserById", ex.getSql(), ex.getSQLException());
+
+		} catch (TypeMismatchDataAccessException ex) {
+
+			logger.error("Type mismatch occurred when finding a user with id: " + userId + " {}", ex.getMessage());
+
+			throw new DatabaseTypeMismatchException("Error finding user: Invalid data type", ex);
 
 		} catch (EmptyResultDataAccessException ex) {
 
-			throw new ApiNotFoundException("User not found with id: " + id);
+			logger.error("User not found expected to find {} user but got {}", ex.getExpectedSize(), ex.getActualSize());
+
+			throw new ApiNotFoundException("User not found with id: " + userId, ex.getExpectedSize(), ex);
 
 		} catch (DataAccessException ex) {
 
@@ -129,15 +144,17 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	@Override
 	public UserResponseModel findUserByUsername(String username) {
 
+		final String sqlQuery = "select * from user where username = :username";
+
+		SqlParameterSource findUserByUsernameSqlParam = new MapSqlParameterSource("username", username);
+
 		try {
 
-			String sqlQuery = "select * from user where username = ?";
-
-			return jdbcTemplate.queryForObject(sqlQuery, new UserResponseRowMapper(), username);
+			return namedParameterJdbcTemplate.queryForObject(sqlQuery, findUserByUsernameSqlParam, new UserResponseRowMapper());
 
 		} catch (EmptyResultDataAccessException ex) {
 
-			throw new ApiNotFoundException("User not found with username: " + username);
+			throw new ApiNotFoundException("User not found with username: ", 1, ex);
 
 		} catch (DataAccessException ex) {
 
@@ -186,13 +203,19 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 			logger.error(userBadSqlGrammarMessage);
 
-			throw new BadSqlQueryException("createUser", sqlQuery, ex.getSQLException());
+			throw new DatabaseBadSqlGrammarException("createUser", ex.getSql(), ex.getSQLException());
+
+		} catch (TypeMismatchDataAccessException ex) {
+
+			logger.error("Type mismatch occurred when creating a user: {}", ex.getMessage());
+
+			throw new DatabaseTypeMismatchException("Error creating user: Invalid data type", ex);
 
 		} catch (DataIntegrityViolationException ex) {
 
 			logger.error(userDuplicateKeyMessage);
 
-			throw new DatabaseDuplicateKeyException(userDuplicateKeyMessage, ex);
+			throw new DatabaseIntegrityConstraintViolationException(userDuplicateKeyMessage, ex);
 
 		} catch (DataAccessException ex) {
 
@@ -219,15 +242,17 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	@Override
 	public boolean userExists(String username) {
 
+		final String sqlQuery = "select count(*) from school.user where username = :username";
+
+		SqlParameterSource sqlParameterSource = new MapSqlParameterSource("username", username);
+
 		try {
 
-			String sqlQuery = "select count(*) from school.user where username = ?";
-
-			int queryResult = jdbcTemplate.queryForObject(sqlQuery, new Object[] { username }, Integer.class);
+			int queryResult = namedParameterJdbcTemplate.queryForObject(sqlQuery, sqlParameterSource, Integer.class);
 
 			logger.info("Completed user exist query now returning user exist query result");
 
-			return queryResult > 0;
+			return queryResult == 1;
 
 		} catch (DataAccessException ex) {
 

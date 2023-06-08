@@ -5,16 +5,29 @@ import com.devdahcoder.otp.contract.OtpContract;
 import com.devdahcoder.otp.mapper.OtpRowMapper;
 import com.devdahcoder.otp.model.OtpModel;
 import com.devdahcoder.otp.model.OtpResponseModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class OtpRepository implements OtpContract {
 
+	private final Logger logger = LoggerFactory.getLogger(OtpRepository.class);
+
+	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
 	private final JdbcTemplate jdbcTemplate;
 
-	public OtpRepository(JdbcTemplate jdbcTemplate) {
+	@Autowired
+	public OtpRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate) {
+
+		this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
 
 		this.jdbcTemplate = jdbcTemplate;
 
@@ -23,11 +36,13 @@ public class OtpRepository implements OtpContract {
 	@Override
 	public OtpResponseModel findOtpByUsername(String username) {
 
+		final String sqlQuery = "select * from school.user where username = username";
+
 		try {
 
-			String sqlQuery = "select * from school.user where username = ?";
+			SqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("username", username);
 
-			return jdbcTemplate.queryForObject(sqlQuery, new OtpRowMapper(), username);
+			return namedParameterJdbcTemplate.queryForObject(sqlQuery, sqlParameterSource, new OtpRowMapper());
 
 		} catch (DataAccessException ex) {
 

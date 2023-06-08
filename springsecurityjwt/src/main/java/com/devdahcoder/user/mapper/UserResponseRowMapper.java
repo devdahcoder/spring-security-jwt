@@ -14,6 +14,7 @@ public class UserResponseRowMapper implements RowMapper<UserResponseModel> {
 		UserResponseModel userResponseModel = new UserResponseModel();
 
 		userResponseModel.setId(resultSet.getLong("id"));
+		userResponseModel.setUserId(resultSet.getString("userId"));
 		userResponseModel.setFirstName(resultSet.getString("firstName"));
 		userResponseModel.setLastName(resultSet.getString("lastName"));
 		userResponseModel.setEmail(resultSet.getString("email"));

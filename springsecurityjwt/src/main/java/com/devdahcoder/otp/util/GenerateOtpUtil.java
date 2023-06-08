@@ -24,6 +24,7 @@ public final class GenerateOtpUtil {
             throw new RuntimeException("Problem when generating the random code.");
 
         }
+
         return code;
 
     }
