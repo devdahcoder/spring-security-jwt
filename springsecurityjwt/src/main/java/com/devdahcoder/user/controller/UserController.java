@@ -1,5 +1,6 @@
 package com.devdahcoder.user.controller;
 
+import com.devdahcoder.user.model.UserAuthenticationResponseModel;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import com.devdahcoder.user.service.UserService;
@@ -10,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -35,15 +35,15 @@ public class UserController {
 
 	@GetMapping("/{id}")
 	@ResponseStatus(code = HttpStatus.FOUND)
-	public ResponseEntity<UserResponseModel> findUserById(@PathVariable UUID userId) {
+	public ResponseEntity<UserResponseModel> findUserById(@PathVariable int id) {
 
-		return new ResponseEntity<>(userService.findUserById(userId), HttpStatus.FOUND);
+		return new ResponseEntity<>(userService.findUserById(id), HttpStatus.FOUND);
 
 	}
 
 	@PostMapping("/signup")
 	@ResponseStatus(code = HttpStatus.CREATED)
-	public ResponseEntity<String> createUser(@RequestBody @Valid UserCreateModel userCreateModel) {
+	public ResponseEntity<UserAuthenticationResponseModel> createUser(@RequestBody @Valid UserCreateModel userCreateModel) {
 
 		return new ResponseEntity<>(userService.createUser(userCreateModel), HttpStatus.CREATED);
 

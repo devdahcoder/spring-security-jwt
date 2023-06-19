@@ -1,12 +1,14 @@
 package com.devdahcoder.configuration.security.provider;
 
+import com.devdahcoder.configuration.security.authentication.UsernamePasswordAuthentication;
 import com.devdahcoder.user.repository.UserRepository;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,13 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 @Configuration
-public class BasicAuthenticationProvider implements AuthenticationProvider {
+public class UsernamePasswordAuthenticationProvider implements AuthenticationProvider {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public BasicAuthenticationProvider(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public UsernamePasswordAuthenticationProvider(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
 		this.userRepository = userRepository;
 
@@ -29,7 +31,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 	}
 
 	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	public Authentication authenticate(@NotNull Authentication authentication) throws AuthenticationException {
 
 		String username = authentication.getName();
 
@@ -41,11 +43,12 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 
 	}
 
-	private Authentication authenticationCheck(UserDetails userDetails, String password, PasswordEncoder passwordEncoder) {
+	@Contract("_, _, _ -> new")
+	private @NotNull Authentication authenticationCheck(UserDetails userDetails, String password, PasswordEncoder passwordEncoder) {
 
 		if (this.checkPasswordVerification(userDetails, password, passwordEncoder)) {
 
-			return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDetails.getPassword(), userDetails.getAuthorities());
+			return new UsernamePasswordAuthentication(userDetails.getUsername(), userDetails.getPassword(), userDetails.getAuthorities());
 
 		} else {
 
@@ -55,7 +58,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 
 	}
 
-	public boolean checkPasswordVerification(@NotNull UserDetails userDetails, String password, @NotNull PasswordEncoder passwordEncoder) {
+	private boolean checkPasswordVerification(@NotNull UserDetails userDetails, String password, @NotNull PasswordEncoder passwordEncoder) {
 
 		return passwordEncoder.matches(password, userDetails.getPassword());
 
@@ -64,7 +67,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 	@Override
 	public boolean supports(Class<?> authentication) {
 
-		return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+		return AbstractAuthenticationToken.class.isAssignableFrom(authentication);
 
 	}
 

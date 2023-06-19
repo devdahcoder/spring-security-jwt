@@ -4,6 +4,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserDetailsContract extends UserDetails {
 
-	String getEmail();
+	public UserRole getRole();
+
+	public String getEmail();
 
 }

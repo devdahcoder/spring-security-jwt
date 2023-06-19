@@ -1,8 +1,12 @@
 package com.devdahcoder.user.service;
 
 import com.devdahcoder.exception.api.ApiAlreadyExistException;
+import com.devdahcoder.jwt.service.JwtService;
 import com.devdahcoder.otp.repository.OtpRepository;
+import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
+import com.devdahcoder.user.contract.UserRole;
+import com.devdahcoder.user.model.UserAuthenticationResponseModel;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import com.devdahcoder.user.repository.UserRepository;
@@ -15,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsManagerContract {
@@ -24,15 +27,27 @@ public class UserService implements UserDetailsManagerContract {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final OtpRepository otpRepository;
+	private final JwtService jwtService;
 
 	@Autowired
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, OtpRepository otpRepository) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, OtpRepository otpRepository, JwtService jwtService) {
 
 		this.userRepository = userRepository;
 
 		this.passwordEncoder = passwordEncoder;
 
 		this.otpRepository = otpRepository;
+
+		this.jwtService = jwtService;
+
+	}
+
+	@Override
+	public UserDetailsContract loadUserByUsername(String username) {
+
+		logger.info("Service: loading user by username: {}", username);
+
+		return userRepository.loadUserByUsername(username);
 
 	}
 
@@ -45,11 +60,11 @@ public class UserService implements UserDetailsManagerContract {
 
 	}
 
-	public UserResponseModel findUserById(UUID userId) {
+	public UserResponseModel findUserById(int id) {
 
 		logger.info("Service: finding user by id");
 
-		return userRepository.findUserById(userId);
+		return userRepository.findUserById(id);
 
 	}
 
@@ -63,23 +78,40 @@ public class UserService implements UserDetailsManagerContract {
 	}
 
 	@Override
-	public String createUser(@NotNull UserCreateModel userCreateModel) {
+	public UserAuthenticationResponseModel createUser(@NotNull UserCreateModel userCreateModel) {
 
-		logger.info("Service: creating a new user");
+		logger.info("Service: Creating a new user {}", userCreateModel.getEmail());
 
-		userCreateModel.setPassword(passwordEncoder.encode(userCreateModel.getPassword()));
-
+		//*
+		// Generates a new id for everytime this method gets called
+		// */
 		userCreateModel.generateUserId();
 
-		boolean userExist = userRepository.userExists(userCreateModel.getUsername());
+		//*
+		// Encodes the password before saving it to the database
+		// */
+		userCreateModel.setPassword(passwordEncoder.encode(userCreateModel.getPassword()));
 
-		if (userExist) {
+		//*
+        // Sets the default role to user
+        // */
+		userCreateModel.setRole(UserRole.USER);
+
+		logger.info("This is the user role {}", userCreateModel.getRole());
+
+		logger.info("Service: Checking if user {} exist", userCreateModel.getEmail());
+
+		if (userRepository.userExists(userCreateModel.getUsername())) {
 
 			throw new ApiAlreadyExistException("User Already exist");
 
 		}
 
-		return userRepository.createUser(userCreateModel);
+		userRepository.createUser(userCreateModel);
+
+		var jwtToken = jwtService.generateJwtToken(userCreateModel);
+
+		return new UserAuthenticationResponseModel(jwtToken);
 
 	}
 
@@ -98,7 +130,7 @@ public class UserService implements UserDetailsManagerContract {
 	@Override
 	public boolean userExists(String username) {
 
-		logger.info("Service: checking if user existed");
+		logger.info("Service: Checking if user {} existed", username);
 
 		return userRepository.userExists(username);
 

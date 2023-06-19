@@ -2,6 +2,7 @@ package com.devdahcoder.user.util;
 
 import com.devdahcoder.otp.model.OtpModel;
 import com.devdahcoder.otp.repository.OtpRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -15,19 +16,15 @@ public class UserCheckOtpUtil {
 
     }
 
-    public boolean checkUserOtp(OtpModel otpModel) {
+    public boolean checkUserOtp(@NotNull OtpModel otpModel) {
 
         boolean otpExist = otpRepository.otpExist(otpModel.getUsername());
 
+        OtpModel userOtpModel = new OtpModel();
+
         if (otpExist) {
 
-            OtpModel userOtpModel = new OtpModel();
-
-            if (otpModel.getCode().equals(userOtpModel.getCode())) {
-
-                return true;
-
-            }
+            return otpModel.getCode().equals(userOtpModel.getCode());
 
         }
 

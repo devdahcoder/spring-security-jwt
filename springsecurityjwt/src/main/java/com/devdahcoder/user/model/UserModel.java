@@ -1,6 +1,7 @@
 package com.devdahcoder.user.model;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
+import com.devdahcoder.user.contract.UserRole;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
@@ -17,21 +18,25 @@ public class UserModel implements UserDetailsContract {
 	private String email;
 	private String pwdAlgo;
 	private String password;
+	private UserRole role;
 	private List<GrantedAuthority> authorities;
 
 	public UserModel() {}
 
-	public UserModel(Long id, UUID userId, String firstName, String lastName, String username, String email, String pwdAlgo, String password, List<GrantedAuthority> authorities) {
-		this.id = id;
-		this.userId = userId;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.username = username;
-		this.email = email;
-		this.pwdAlgo = pwdAlgo;
-		this.password = password;
-		this.authorities = authorities;
-	}
+	public UserModel(Long id, UUID userId, String firstName, String lastName, String username, String email, String pwdAlgo, String password, UserRole role, List<GrantedAuthority> authorities) {
+
+        this.id = id;
+        this.userId = userId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.email = email;
+        this.pwdAlgo = pwdAlgo;
+        this.password = password;
+        this.role = role;
+        this.authorities = authorities;
+
+    }
 
 	public Long getId() {
 
@@ -81,6 +86,13 @@ public class UserModel implements UserDetailsContract {
 
 	}
 
+	@Override
+	public String getUsername() {
+
+		return this.username;
+
+	}
+
 	public void setUsername(String username) {
 
 		this.username = username;
@@ -112,19 +124,6 @@ public class UserModel implements UserDetailsContract {
 
 	}
 
-	public void setPassword(String password) {
-
-		this.password = password;
-
-	}
-
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-
-		return List.of(() -> "delete");
-
-	}
-
 	@Override
 	public String getPassword() {
 
@@ -132,10 +131,28 @@ public class UserModel implements UserDetailsContract {
 
 	}
 
-	@Override
-	public String getUsername() {
+	public void setPassword(String password) {
 
-		return this.username;
+		this.password = password;
+
+	}
+
+	public UserRole getRole() {
+
+		return role;
+
+	}
+
+	public void setRole(UserRole role) {
+
+		this.role = role;
+
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+
+		return List.of(() -> "delete");
 
 	}
 

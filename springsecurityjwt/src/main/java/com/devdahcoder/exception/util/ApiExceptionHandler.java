@@ -83,7 +83,7 @@ public class ApiExceptionHandler {
 
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(AuthenticationException.class)
-	public ResponseEntity<Object> getUnAuthorisedExceptionHandler(AuthenticationException authenticationException) {
+	public ResponseEntity<Object> getUnauthorisedExceptionHandler(AuthenticationException authenticationException) {
 
 		ApiExceptionResponseModel apiExceptionResponseModel = new ApiExceptionResponseModel(
 				authenticationException.getMessage(),

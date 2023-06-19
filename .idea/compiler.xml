@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="springsecurityjwt.springsecurityjwt.main" target="17" />
-      <module name="springsecurityjwt.springsecurityjwt.test" target="17" />
+      <module name="springsecurityjwt.springsecurityjwt.main~1" target="17" />
+      <module name="springsecurityjwt.springsecurityjwt.test~1" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>

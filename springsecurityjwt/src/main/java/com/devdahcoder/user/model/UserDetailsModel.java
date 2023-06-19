@@ -1,6 +1,7 @@
 package com.devdahcoder.user.model;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
+import com.devdahcoder.user.contract.UserRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -14,6 +15,13 @@ public class UserDetailsModel implements UserDetailsContract {
 	public UserDetailsModel(UserModel userModel) {
 
 		this.userModel = userModel;
+
+	}
+
+	@Override
+	public UserRole getRole() {
+
+		return userModel.getRole();
 
 	}
 

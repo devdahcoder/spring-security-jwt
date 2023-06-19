@@ -1,5 +1,6 @@
 package com.devdahcoder.user.util;
 
+import com.devdahcoder.exception.api.ApiNotFoundException;
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.repository.UserRepository;
@@ -29,15 +30,23 @@ public class UserOtpVerificationUtil {
 
     private void userOtpAuthentication(@NotNull UserCreateModel userCreateModel) {
 
-        UserDetailsContract userDetailsContract = userRepository.loadUserByUsername(userCreateModel.getUsername());
+        try {
 
-        if (userDetailsContract == null || !passwordEncoder.matches(userCreateModel.getPassword(), userDetailsContract.getPassword())) {
+            UserDetailsContract user = userRepository.loadUserByUsername(userCreateModel.getUsername());
+
+            if (!passwordEncoder.matches(userCreateModel.getPassword(), user.getPassword())) {
+
+                throw new BadCredentialsException("Bad credentials provided");
+
+            }
+
+            userRenewOtpUtil.userRenewOtp(userCreateModel);
+
+        } catch (ApiNotFoundException ex) {
 
             throw new BadCredentialsException("Bad credentials provided.");
 
         }
-
-        userRenewOtpUtil.userRenewOtp(userCreateModel);
 
     }
 

@@ -10,10 +10,7 @@ import com.devdahcoder.exception.api.ApiNotFoundException;
 import com.devdahcoder.user.extractor.UserResponseExtractor;
 import com.devdahcoder.user.mapper.UserResponseRowMapper;
 import com.devdahcoder.user.mapper.UserRowMapper;
-import com.devdahcoder.user.model.UserCreateModel;
-import com.devdahcoder.user.model.UserDetailsModel;
-import com.devdahcoder.user.model.UserModel;
-import com.devdahcoder.user.model.UserResponseModel;
+import com.devdahcoder.user.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +28,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.UUID;
 
 @Repository
 public class UserRepository implements UserDetailsService, UserDetailsManagerContract {
@@ -54,15 +50,15 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 		final SqlParameterSource sqlParameterSource = new MapSqlParameterSource("username", username);
 
-		UserModel userExist = namedParameterJdbcTemplate.queryForObject(sqlQuery, sqlParameterSource, new UserRowMapper());
+		UserModel user = namedParameterJdbcTemplate.queryForObject(sqlQuery, sqlParameterSource, new UserRowMapper());
 
-		if (userExist == null) {
+		if (user == null) {
 
 			throw new UsernameNotFoundException("User not found");
 
 		}
 
-		return new UserDetailsModel(userExist);
+		return new UserDetailsModel(user);
 
 	}
 
@@ -103,13 +99,13 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	}
 
-	public UserResponseModel findUserById(UUID userId) {
+	public UserResponseModel findUserById(int id) {
 
-		final String sqlQuery = "select * from school.user where userId = :userId";
+		final String sqlQuery = "select * from school.user where id = :id";
 
 		final String userBadSqlGrammarMessage = "Bad sql grammar, there was an issue with the sql query " + sqlQuery;
 
-		SqlParameterSource findUserByIdSqlParam = new MapSqlParameterSource("userId", userId);
+		SqlParameterSource findUserByIdSqlParam = new MapSqlParameterSource("id", id);
 
 		try {
 
@@ -123,7 +119,7 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 		} catch (TypeMismatchDataAccessException ex) {
 
-			logger.error("Type mismatch occurred when finding a user with id: " + userId + " {}", ex.getMessage());
+			logger.error("Type mismatch occurred when finding a user with id: " + id + " {}", ex.getMessage());
 
 			throw new DatabaseTypeMismatchException("Error finding user: Invalid data type", ex);
 
@@ -131,7 +127,7 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 			logger.error("User not found expected to find {} user but got {}", ex.getExpectedSize(), ex.getActualSize());
 
-			throw new ApiNotFoundException("User not found with id: " + userId, ex.getExpectedSize(), ex);
+			throw new ApiNotFoundException("User not found with id: " + id, ex.getExpectedSize(), ex);
 
 		} catch (DataAccessException ex) {
 
@@ -165,9 +161,9 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	}
 
 	@Override
-	public String createUser(@NotNull UserCreateModel userCreateModel) {
+	public UserAuthenticationResponseModel createUser(@NotNull UserCreateModel userCreateModel) {
 
-		final String sqlQuery = "INSERT INTO school.user (userId, firstName, lastName, username, email, password) VALUES (:userId, :firstName, :lastName, :username, :email, :password)";
+		final String sqlQuery = "INSERT INTO school.user (userId, firstName, lastName, username, email, role, password) VALUES (:userId, :firstName, :lastName, :username, :email, :role, :password)";
 
 		final String userCreationErrorMessage = "Something went wrong while trying to create a new user";
 
@@ -183,13 +179,14 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 					.addValue("lastName", userCreateModel.getLastName())
 					.addValue("username", userCreateModel.getUsername())
 					.addValue("email", userCreateModel.getEmail())
+					.addValue("role", userCreateModel.getRole().name())
 					.addValue("password", userCreateModel.getPassword());
 
 			int queryResult = namedParameterJdbcTemplate.update(sqlQuery, createUserSqlParam);
 
 			if (queryResult == 1) {
 
-				return userCreateModel.getUsername();
+				return new UserAuthenticationResponseModel("Created");
 
 			} else {
 
