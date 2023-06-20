@@ -8,7 +8,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Repository;
 
 import java.security.Key;
@@ -48,9 +47,11 @@ public class JwtRepository implements JwtContract {
     @Override
     public String generateJwtToken(Map<String, Object> claims, @NotNull UserDetailsContract userDetails) {
 
-        return Jwts.builder()
+        return Jwts
+                .builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())
+                .setIssuer("devdahcoder")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
@@ -59,11 +60,11 @@ public class JwtRepository implements JwtContract {
     }
 
     @Override
-    public boolean isTokenValid(String jwtToken, @NotNull UserDetailsContract userDetailsContract) {
+    public boolean isTokenValid(String jwtToken, @NotNull UserDetailsContract userDetails) {
 
         final String username = extractUserDetails(jwtToken);
 
-        return username.equals(userDetailsContract.getUsername()) && !isTokenExpired(jwtToken);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(jwtToken);
 
     }
 
@@ -88,7 +89,7 @@ public class JwtRepository implements JwtContract {
                 .parserBuilder()
                 .setSigningKey(getSignInKey())
                 .build()
-                .parseClaimsJwt(jwtToken)
+                .parseClaimsJws(jwtToken)
                 .getBody();
 
     }
@@ -101,4 +102,5 @@ public class JwtRepository implements JwtContract {
         return Keys.hmacShaKeyFor(keyBytes);
 
     }
+
 }

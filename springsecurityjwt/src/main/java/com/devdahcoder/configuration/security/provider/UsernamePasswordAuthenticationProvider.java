@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,7 +49,7 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
 
 		if (this.checkPasswordVerification(userDetails, password, passwordEncoder)) {
 
-			return new UsernamePasswordAuthentication(userDetails.getUsername(), userDetails.getPassword(), userDetails.getAuthorities());
+			return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDetails.getPassword(), userDetails.getAuthorities());
 
 		} else {
 
@@ -67,7 +68,7 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
 	@Override
 	public boolean supports(Class<?> authentication) {
 
-		return AbstractAuthenticationToken.class.isAssignableFrom(authentication);
+		return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
 
 	}
 

@@ -46,19 +46,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                UserDetailsContract userDetailsContract = userService.loadUserByUsername(username);
+                UserDetailsContract userDetails = userService.loadUserByUsername(username);
 
-                if (jwtService.isTokenValid(jwtToken, userDetailsContract)) {
+                if (jwtService.isTokenValid(jwtToken, userDetails)) {
 
-                    UsernamePasswordAuthenticationToken authenticationToken = createAuthenticationToken(userDetailsContract, request);
+                    UsernamePasswordAuthenticationToken authentication = createAuthentication(userDetails, request);
 
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 }
 
             }
-
-            filterChain.doFilter(request, response);
 
         }
 
@@ -73,9 +71,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     }
 
-    private @NotNull UsernamePasswordAuthenticationToken createAuthenticationToken(UserDetailsContract userDetailsContract, HttpServletRequest request) {
+    private @NotNull UsernamePasswordAuthenticationToken createAuthentication(UserDetailsContract userDetails, HttpServletRequest request) {
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetailsContract, null, userDetailsContract.getAuthorities());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
 
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

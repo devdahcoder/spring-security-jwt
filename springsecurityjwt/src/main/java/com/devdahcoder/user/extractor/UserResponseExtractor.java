@@ -26,6 +26,7 @@ public class UserResponseExtractor implements ResultSetExtractor<List<UserRespon
 			userResponseModel.setLastName(resultSet.getString("lastName"));
 			userResponseModel.setEmail(resultSet.getString("email"));
 			userResponseModel.setUsername(resultSet.getString("username"));
+			userResponseModel.setRole(resultSet.getString("role"));
 
 			userResponseModelList.add(userResponseModel);
 
