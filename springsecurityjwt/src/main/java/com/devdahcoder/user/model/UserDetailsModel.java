@@ -1,12 +1,9 @@
 package com.devdahcoder.user.model;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
-import com.devdahcoder.user.contract.UserRole;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 public class UserDetailsModel implements UserDetailsContract {
 
@@ -19,7 +16,7 @@ public class UserDetailsModel implements UserDetailsContract {
 	}
 
 	@Override
-	public UserRole getRole() {
+	public String getRole() {
 
 		return userModel.getRole();
 
@@ -35,11 +32,7 @@ public class UserDetailsModel implements UserDetailsContract {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 
-		return userModel
-				.getAuthorities()
-				.stream()
-				.map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
-				.collect(Collectors.toList());
+		return userModel.getAuthorities();
 
 	}
 

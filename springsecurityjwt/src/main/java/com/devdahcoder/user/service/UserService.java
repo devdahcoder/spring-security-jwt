@@ -2,11 +2,8 @@ package com.devdahcoder.user.service;
 
 import com.devdahcoder.exception.api.ApiAlreadyExistException;
 import com.devdahcoder.jwt.service.JwtService;
-import com.devdahcoder.otp.repository.OtpRepository;
-import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
 import com.devdahcoder.user.contract.UserRole;
-import com.devdahcoder.user.model.UserAuthenticationResponseModel;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import com.devdahcoder.user.repository.UserRepository;
@@ -26,28 +23,16 @@ public class UserService implements UserDetailsManagerContract {
 	private final Logger logger = LoggerFactory.getLogger(UserService.class);
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final OtpRepository otpRepository;
 	private final JwtService jwtService;
 
 	@Autowired
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, OtpRepository otpRepository, JwtService jwtService) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
 
 		this.userRepository = userRepository;
 
 		this.passwordEncoder = passwordEncoder;
 
-		this.otpRepository = otpRepository;
-
 		this.jwtService = jwtService;
-
-	}
-
-	@Override
-	public UserDetailsContract loadUserByUsername(String username) {
-
-		logger.info("Service: loading user by username: {}", username);
-
-		return userRepository.loadUserByUsername(username);
 
 	}
 
@@ -78,7 +63,7 @@ public class UserService implements UserDetailsManagerContract {
 	}
 
 	@Override
-	public UserAuthenticationResponseModel createUser(@NotNull UserCreateModel userCreateModel) {
+	public String createUser(@NotNull UserCreateModel userCreateModel) {
 
 		logger.info("Service: Creating a new user {}", userCreateModel.getEmail());
 
@@ -97,21 +82,15 @@ public class UserService implements UserDetailsManagerContract {
         // */
 		userCreateModel.setRole(UserRole.USER);
 
-		logger.info("This is the user role {}", userCreateModel.getRole());
-
 		logger.info("Service: Checking if user {} exist", userCreateModel.getEmail());
 
 		if (userRepository.userExists(userCreateModel.getUsername())) {
 
-			throw new ApiAlreadyExistException("User Already exist");
+			throw new ApiAlreadyExistException(String.format("User with username %s Already exist", userCreateModel.getUsername()));
 
 		}
 
-		userRepository.createUser(userCreateModel);
-
-		var jwtToken = jwtService.generateJwtToken(userCreateModel);
-
-		return new UserAuthenticationResponseModel(jwtToken);
+		return userRepository.createUser(userCreateModel);
 
 	}
 

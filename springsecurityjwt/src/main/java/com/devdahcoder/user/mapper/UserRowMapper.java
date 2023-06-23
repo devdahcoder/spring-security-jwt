@@ -1,5 +1,6 @@
 package com.devdahcoder.user.mapper;
 
+import com.devdahcoder.user.contract.UserRole;
 import com.devdahcoder.user.model.UserModel;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -19,6 +20,7 @@ public class UserRowMapper implements RowMapper<UserModel> {
 		userModel.setPassword(resultSet.getString("password"));
 		userModel.setEmail(resultSet.getString("email"));
 		userModel.setUsername(resultSet.getString("username"));
+		userModel.setRole(UserRole.valueOf(resultSet.getString("role")));
 
 		return userModel;
 

@@ -2,7 +2,9 @@ package com.devdahcoder.user.model;
 
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserRole;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +35,7 @@ public class UserModel implements UserDetailsContract {
         this.email = email;
         this.pwdAlgo = pwdAlgo;
         this.password = password;
-        this.role = role;
+        this.role = UserRole.valueOf(role.toString());
         this.authorities = authorities;
 
     }
@@ -137,22 +139,22 @@ public class UserModel implements UserDetailsContract {
 
 	}
 
-	public UserRole getRole() {
+	public String getRole() {
 
-		return role;
+		return role.name();
 
 	}
 
-	public void setRole(UserRole role) {
+	public void setRole(@NotNull UserRole role) {
 
-		this.role = role;
+		this.role = UserRole.valueOf(role.toString());
 
 	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 
-		return List.of(() -> "delete");
+		return List.of(new SimpleGrantedAuthority(this.getRole()));
 
 	}
 

@@ -1,17 +1,14 @@
 package com.devdahcoder.user.model;
 
-import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.security.core.GrantedAuthority;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class UserCreateModel implements UserDetailsContract {
+public class UserCreateModel {
 
 	private UUID userId;
 	@NotBlank( message = "Firstname cannot be empty" )
@@ -36,7 +33,7 @@ public class UserCreateModel implements UserDetailsContract {
 		this.email = email;
 		this.username = username;
 		this.password = password;
-		this.role = role;
+		this.role = UserRole.valueOf(role.toString());
 
 	}
 
@@ -112,51 +109,15 @@ public class UserCreateModel implements UserDetailsContract {
 
 	}
 
-	@Override
-	public UserRole getRole() {
+	public String getRole() {
 
-		return role;
-
-	}
-
-	public void setRole(UserRole role) {
-
-		this.role = role;
+		return role.name();
 
 	}
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
+	public void setRole(@NotNull UserRole role) {
 
-		return List.of(() -> "write");
-
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-
-		return true;
-
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-
-		return true;
-
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-
-		return true;
-
-	}
-
-	@Override
-	public boolean isEnabled() {
-
-		return true;
+		this.role = UserRole.valueOf(role.toString());
 
 	}
 

@@ -3,18 +3,17 @@ package com.devdahcoder.user.repository;
 import com.devdahcoder.exception.database.DatabaseBadSqlGrammarException;
 import com.devdahcoder.exception.database.DatabaseIntegrityConstraintViolationException;
 import com.devdahcoder.exception.database.DatabaseTypeMismatchException;
-import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
 import com.devdahcoder.exception.api.ApiException;
 import com.devdahcoder.exception.api.ApiNotFoundException;
 import com.devdahcoder.user.extractor.UserResponseExtractor;
 import com.devdahcoder.user.mapper.UserResponseRowMapper;
-import com.devdahcoder.user.mapper.UserRowMapper;
 import com.devdahcoder.user.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -23,14 +22,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
-public class UserRepository implements UserDetailsService, UserDetailsManagerContract {
+@Configuration
+public class UserRepository implements UserDetailsManagerContract {
 
 	private final Logger logger = LoggerFactory.getLogger(UserRepository.class);
 
@@ -40,25 +36,6 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	public UserRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 
 		this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-
-	}
-
-	@Override
-	public UserDetailsContract loadUserByUsername(String username) throws UsernameNotFoundException {
-
-		String sqlQuery = "select * from school.user where username = :username";
-
-		final SqlParameterSource sqlParameterSource = new MapSqlParameterSource("username", username);
-
-		UserModel user = namedParameterJdbcTemplate.queryForObject(sqlQuery, sqlParameterSource, new UserRowMapper());
-
-		if (user == null) {
-
-			throw new UsernameNotFoundException("User not found");
-
-		}
-
-		return new UserDetailsModel(user);
 
 	}
 
@@ -161,7 +138,7 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	}
 
 	@Override
-	public UserAuthenticationResponseModel createUser(@NotNull UserCreateModel userCreateModel) {
+	public String createUser(@NotNull UserCreateModel userCreateModel) {
 
 		final String sqlQuery = "INSERT INTO school.user (userId, firstName, lastName, username, email, role, password) VALUES (:userId, :firstName, :lastName, :username, :email, :role, :password)";
 
@@ -179,14 +156,14 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 					.addValue("lastName", userCreateModel.getLastName())
 					.addValue("username", userCreateModel.getUsername())
 					.addValue("email", userCreateModel.getEmail())
-					.addValue("role", userCreateModel.getRole().name())
+					.addValue("role", userCreateModel.getRole())
 					.addValue("password", userCreateModel.getPassword());
 
 			int queryResult = namedParameterJdbcTemplate.update(sqlQuery, createUserSqlParam);
 
 			if (queryResult == 1) {
 
-				return new UserAuthenticationResponseModel("Created");
+				return "Successfully created " + userCreateModel.getUsername();
 
 			} else {
 

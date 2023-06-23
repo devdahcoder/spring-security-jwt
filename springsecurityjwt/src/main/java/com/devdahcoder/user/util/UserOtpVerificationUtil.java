@@ -1,5 +1,6 @@
 package com.devdahcoder.user.util;
 
+import com.devdahcoder.authentication.service.AuthenticationService;
 import com.devdahcoder.exception.api.ApiNotFoundException;
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.model.UserCreateModel;
@@ -13,14 +14,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class UserOtpVerificationUtil {
 
-    private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
     private final PasswordEncoder passwordEncoder;
     private final UserRenewOtpUtil userRenewOtpUtil;
 
     @Autowired
-    public UserOtpVerificationUtil(UserRepository userRepository, PasswordEncoder passwordEncoder, UserRenewOtpUtil userRenewOtpUtil) {
+    public UserOtpVerificationUtil(AuthenticationService authenticationService, PasswordEncoder passwordEncoder, UserRenewOtpUtil userRenewOtpUtil) {
 
-        this.userRepository = userRepository;
+        this.authenticationService = authenticationService;
 
         this.passwordEncoder = passwordEncoder;
 
@@ -32,7 +33,7 @@ public class UserOtpVerificationUtil {
 
         try {
 
-            UserDetailsContract user = userRepository.loadUserByUsername(userCreateModel.getUsername());
+            UserDetailsContract user = authenticationService.loadUserByUsername(userCreateModel.getUsername());
 
             if (!passwordEncoder.matches(userCreateModel.getPassword(), user.getPassword())) {
 

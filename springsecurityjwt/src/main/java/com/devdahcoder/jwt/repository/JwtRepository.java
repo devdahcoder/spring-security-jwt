@@ -8,7 +8,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Repository;
+import org.springframework.context.annotation.Configuration;
 
 import java.security.Key;
 import java.util.Date;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Repository
+@Configuration
 public class JwtRepository implements JwtContract {
 
     private static final String SECURITY_KEY = "9C1u3g8B+V6kBrH9JJs42QaR9JEcry0pYUXQQz/2V/ht1xgkkuoI96MIBW2e/qxTubWNSRJf3uTkBLPzSqY80mtoIanUrvulP9A1qWS7ZBx/tDlFS/qR/ozBXYOpAkSBrl1DhM6q0OOX1zsKmV0rvcckDWDGys8nuvpb1IW4soeWhlRC8Yw8BL74CP+B7EOaqdGo0lE1aIDr2RhMQHoV+70CcYPTW2FuWGJ6qDaonTXXk9Ets7Q3hj4HyF0wCMiR9LwgGUh1e6D68w5KmbmYi2/I9Qq1R0IjdGy4Y5ywOjLgcxJTZYzBf6OvexYctpBc+ml7fA/NtHLQZvnxLgbGViuQVnT2MMkNQknw+v0MNe0=";

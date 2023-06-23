@@ -1,6 +1,8 @@
 package com.devdahcoder.configuration.security.provider;
 
+import com.devdahcoder.authentication.service.AuthenticationService;
 import com.devdahcoder.configuration.security.authentication.UsernamePasswordAuthentication;
+import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.repository.UserRepository;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -12,20 +14,19 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 @Configuration
 public class UsernamePasswordAuthenticationProvider implements AuthenticationProvider {
 
-	private final UserRepository userRepository;
+	private final AuthenticationService authenticationService;
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public UsernamePasswordAuthenticationProvider(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public UsernamePasswordAuthenticationProvider(AuthenticationService authenticationService, PasswordEncoder passwordEncoder) {
 
-		this.userRepository = userRepository;
+		this.authenticationService = authenticationService;
 
 		this.passwordEncoder = passwordEncoder;
 
@@ -38,16 +39,15 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
 
 		String password = authentication.getCredentials().toString();
 
-		UserDetails userDetails = userRepository.loadUserByUsername(username);
+		UserDetailsContract userDetails = authenticationService.loadUserByUsername(username);
 
-		return authenticationCheck(userDetails, password, passwordEncoder);
+		return authenticationCheck(userDetails, username, password, passwordEncoder);
 
 	}
 
-	@Contract("_, _, _ -> new")
-	private @NotNull Authentication authenticationCheck(UserDetails userDetails, String password, PasswordEncoder passwordEncoder) {
+	private @NotNull Authentication authenticationCheck(UserDetailsContract userDetails, String username, String password, PasswordEncoder passwordEncoder) {
 
-		if (this.checkPasswordVerification(userDetails, password, passwordEncoder)) {
+		if (this.checkPasswordVerification(userDetails, password, passwordEncoder) && this.checkUsernameVerification(userDetails, username)) {
 
 			return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDetails.getPassword(), userDetails.getAuthorities());
 
@@ -59,7 +59,13 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
 
 	}
 
-	private boolean checkPasswordVerification(@NotNull UserDetails userDetails, String password, @NotNull PasswordEncoder passwordEncoder) {
+	private boolean checkUsernameVerification(@NotNull UserDetailsContract userDetails, String username) {
+
+		return userDetails.getUsername().equals(username);
+
+	}
+
+	private boolean checkPasswordVerification(@NotNull UserDetailsContract userDetails, String password, @NotNull PasswordEncoder passwordEncoder) {
 
 		return passwordEncoder.matches(password, userDetails.getPassword());
 

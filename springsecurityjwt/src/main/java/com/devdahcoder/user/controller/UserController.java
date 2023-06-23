@@ -1,6 +1,5 @@
 package com.devdahcoder.user.controller;
 
-import com.devdahcoder.user.model.UserAuthenticationResponseModel;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import com.devdahcoder.user.service.UserService;
@@ -33,6 +32,14 @@ public class UserController {
 
 	}
 
+	@GetMapping("/hello")
+	@ResponseStatus(code = HttpStatus.OK)
+	public ResponseEntity<String> hello() {
+
+		return new ResponseEntity<>("Hello World", HttpStatus.OK);
+
+	}
+
 	@GetMapping("/{id}")
 	@ResponseStatus(code = HttpStatus.FOUND)
 	public ResponseEntity<UserResponseModel> findUserById(@PathVariable int id) {
@@ -43,7 +50,7 @@ public class UserController {
 
 	@PostMapping("/signup")
 	@ResponseStatus(code = HttpStatus.CREATED)
-	public ResponseEntity<UserAuthenticationResponseModel> createUser(@RequestBody @Valid UserCreateModel userCreateModel) {
+	public ResponseEntity<String> createUser(@RequestBody @Valid UserCreateModel userCreateModel) {
 
 		return new ResponseEntity<>(userService.createUser(userCreateModel), HttpStatus.CREATED);
 

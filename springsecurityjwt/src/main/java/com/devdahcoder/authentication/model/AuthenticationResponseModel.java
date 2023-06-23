@@ -1,12 +1,12 @@
-package com.devdahcoder.user.model;
+package com.devdahcoder.authentication.model;
 
 import java.util.Objects;
 
-public class UserAuthenticationResponseModel {
+public class AuthenticationResponseModel {
 
     private String jwtToken;
 
-    public UserAuthenticationResponseModel(String jwtToken) {
+    public AuthenticationResponseModel(String jwtToken) {
 
         this.jwtToken = jwtToken;
 
@@ -29,7 +29,7 @@ public class UserAuthenticationResponseModel {
 
         if (this == o) return true;
 
-        if (!(o instanceof UserAuthenticationResponseModel that)) return false;
+        if (!(o instanceof AuthenticationResponseModel that)) return false;
 
         return Objects.equals(getJwtToken(), that.getJwtToken());
 
@@ -45,7 +45,7 @@ public class UserAuthenticationResponseModel {
     @Override
     public String toString() {
 
-        return "UserAuthenticationResponseModel{" +
+        return "AuthenticationResponseModel{" +
                 "jwtToken='" + jwtToken + '\'' +
                 '}';
 

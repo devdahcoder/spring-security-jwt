@@ -1,16 +1,22 @@
 package com.devdahcoder.configuration.security.filter;
 
+import com.devdahcoder.authentication.service.AuthenticationService;
 import com.devdahcoder.jwt.service.JwtService;
 import com.devdahcoder.user.contract.UserDetailsContract;
 import com.devdahcoder.user.service.UserService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -21,15 +27,16 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private final static Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
-    private final UserService userService;
+    private final AuthenticationService authenticationService;
 
     @Autowired
-    public JwtAuthenticationFilter(JwtService jwtService, UserService userService) {
+    public JwtAuthenticationFilter(JwtService jwtService, AuthenticationService authenticationService) {
 
         this.jwtService = jwtService;
 
-        this.userService = userService;
+        this.authenticationService = authenticationService;
 
     }
 
@@ -40,22 +47,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (isValidAuthHeader(authHeader)) {
 
-            String jwtToken = this.extractJwtToken(authHeader);
+            try {
 
-            String username = jwtService.extractUserDetails(jwtToken);
+                String jwtToken = this.extractJwtToken(authHeader);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                String username = jwtService.extractUserDetails(jwtToken);
 
-                UserDetailsContract userDetails = userService.loadUserByUsername(username);
+                logger.info("user {} not fount", username);
 
-                if (jwtService.isTokenValid(jwtToken, userDetails)) {
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                    UsernamePasswordAuthenticationToken authentication = createAuthentication(userDetails, request);
+                    UserDetailsContract userDetails = authenticationService.loadUserByUsername(username);
 
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    if (jwtService.isTokenValid(jwtToken, userDetails)) {
+
+                        UsernamePasswordAuthenticationToken authentication = createAuthentication(userDetails, request);
+
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    }
 
                 }
 
+//                filterChain.doFilter(request, response);
+
+            } catch (JwtException ex) {
+                // Handle JWT-related exceptions (e.g., expired token, invalid signature, etc.)
+                response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid JWT token");
+            } catch (AuthenticationException ex) {
+                // Handle authentication-related exceptions (e.g., user not found, invalid credentials, etc.)
+                response.sendError(HttpStatus.UNAUTHORIZED.value(), "Authentication failed: " + ex.getMessage());
             }
 
         }
@@ -73,7 +94,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private @NotNull UsernamePasswordAuthenticationToken createAuthentication(UserDetailsContract userDetails, HttpServletRequest request) {
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
