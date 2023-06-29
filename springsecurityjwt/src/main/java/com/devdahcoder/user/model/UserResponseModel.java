@@ -1,6 +1,6 @@
 package com.devdahcoder.user.model;
 
-import java.util.Objects;
+import java.sql.Date;
 
 public class UserResponseModel {
 
@@ -11,10 +11,22 @@ public class UserResponseModel {
 	private String email;
 	private String username;
 	private String role;
+	private String gender;
+	private Date createdAt;
 
 	public UserResponseModel() {}
 
-	public UserResponseModel(Long id, String userId, String firstName, String lastName, String email, String username, String role) {
+	public UserResponseModel(
+			Long id,
+			String userId,
+			String firstName,
+			String lastName,
+			String email,
+			String username,
+			String role,
+			String gender,
+			Date createdAt
+	) {
 
 		this.id = id;
 		this.userId = userId;
@@ -23,6 +35,8 @@ public class UserResponseModel {
 		this.email = email;
 		this.username = username;
 		this.role = role;
+		this.gender = gender;
+		this.createdAt = createdAt;
 
 	}
 
@@ -110,34 +124,28 @@ public class UserResponseModel {
 
 	}
 
-	@Override
-	public String toString() {
+	public String getGender() {
 
-		return "UserResponseModel{" +
-				"id=" + id +
-				", userId=" + userId +
-				", firstName='" + firstName + '\'' +
-				", lastName='" + lastName + '\'' +
-				", email='" + email + '\'' +
-				", username='" + username + '\'' +
-				", role='" + role + '\'' +
-				'}';
+		return gender;
 
 	}
 
-	@Override
-	public boolean equals(Object o) {
+	public void setGender(String gender) {
 
-		if (this == o) return true;
-		if (!(o instanceof UserResponseModel that)) return false;
-		return Objects.equals(getId(), that.getId()) && Objects.equals(getUserId(), that.getUserId()) && Objects.equals(getFirstName(), that.getFirstName()) && Objects.equals(getLastName(), that.getLastName()) && Objects.equals(getEmail(), that.getEmail()) && Objects.equals(getUsername(), that.getUsername()) && Objects.equals(getRole(), that.getRole());
+		this.gender = gender;
 
 	}
 
-	@Override
-	public int hashCode() {
+	public Date getCreatedAt() {
 
-		return Objects.hash(getId(), getUserId(), getFirstName(), getLastName(), getEmail(), getUsername(), getRole());
+		return createdAt;
 
 	}
+
+	public void setCreatedAt(Date createdAt) {
+
+		this.createdAt = createdAt;
+
+	}
+
 }

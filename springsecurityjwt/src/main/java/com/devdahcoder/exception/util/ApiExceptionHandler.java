@@ -3,7 +3,10 @@ package com.devdahcoder.exception.util;
 import com.devdahcoder.exception.api.ApiAlreadyExistException;
 import com.devdahcoder.exception.api.ApiException;
 import com.devdahcoder.exception.api.ApiNotFoundException;
+import com.devdahcoder.exception.api.ApiAuthenticationException;
 import com.devdahcoder.exception.api.model.ApiExceptionResponseModel;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.naming.AuthenticationException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -19,6 +21,15 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+	private final HttpServletRequest httpServletRequest;
+
+	@Autowired
+	public ApiExceptionHandler(HttpServletRequest httpServletRequest) {
+
+		this.httpServletRequest = httpServletRequest;
+
+	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -59,7 +70,8 @@ public class ApiExceptionHandler {
 				apiAlreadyExistException.getMessage(),
 				HttpStatus.CONFLICT,
 				HttpStatus.CONFLICT.value(),
-				ZonedDateTime.now(ZoneId.of("Z"))
+				ZonedDateTime.now(ZoneId.of("Z")),
+				httpServletRequest.getServletPath()
 		);
 
 		return new ResponseEntity<>(userExceptionResponse, HttpStatus.CONFLICT);
@@ -82,14 +94,15 @@ public class ApiExceptionHandler {
 	}
 
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	@ExceptionHandler(AuthenticationException.class)
-	public ResponseEntity<Object> getUnauthorisedExceptionHandler(AuthenticationException authenticationException) {
+	@ExceptionHandler(ApiAuthenticationException.class)
+	public ResponseEntity<Object> getUnauthorizedExceptionHandler(ApiAuthenticationException apiAuthenticationException) {
 
 		ApiExceptionResponseModel apiExceptionResponseModel = new ApiExceptionResponseModel(
-				authenticationException.getMessage(),
+				apiAuthenticationException.getMessage(),
 				HttpStatus.UNAUTHORIZED,
 				HttpStatus.UNAUTHORIZED.value(),
-				ZonedDateTime.now(ZoneId.of("Z"))
+				ZonedDateTime.now(ZoneId.of("Z")),
+				httpServletRequest.getServletPath()
 		);
 
 		return new ResponseEntity<>(apiExceptionResponseModel, HttpStatus.UNAUTHORIZED);

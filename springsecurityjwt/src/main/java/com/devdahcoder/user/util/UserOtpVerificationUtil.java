@@ -1,27 +1,26 @@
 package com.devdahcoder.user.util;
 
-import com.devdahcoder.authentication.service.AuthenticationService;
-import com.devdahcoder.exception.api.ApiNotFoundException;
-import com.devdahcoder.user.contract.UserDetailsContract;
+import org.jetbrains.annotations.NotNull;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.repository.UserRepository;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.devdahcoder.user.contract.UserDetailsContract;
+import com.devdahcoder.exception.api.ApiNotFoundException;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.BadCredentialsException;
 
 @Configuration
 public class UserOtpVerificationUtil {
 
-    private final AuthenticationService authenticationService;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRenewOtpUtil userRenewOtpUtil;
 
     @Autowired
-    public UserOtpVerificationUtil(AuthenticationService authenticationService, PasswordEncoder passwordEncoder, UserRenewOtpUtil userRenewOtpUtil) {
+    public UserOtpVerificationUtil(UserRepository userRepository, PasswordEncoder passwordEncoder, UserRenewOtpUtil userRenewOtpUtil) {
 
-        this.authenticationService = authenticationService;
+        this.userRepository = userRepository;
 
         this.passwordEncoder = passwordEncoder;
 
@@ -33,7 +32,7 @@ public class UserOtpVerificationUtil {
 
         try {
 
-            UserDetailsContract user = authenticationService.loadUserByUsername(userCreateModel.getUsername());
+            UserDetailsContract user = userRepository.loadUserByUsername(userCreateModel.getUsername());
 
             if (!passwordEncoder.matches(userCreateModel.getPassword(), user.getPassword())) {
 

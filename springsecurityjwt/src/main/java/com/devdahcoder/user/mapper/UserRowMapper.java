@@ -21,6 +21,8 @@ public class UserRowMapper implements RowMapper<UserModel> {
 		userModel.setEmail(resultSet.getString("email"));
 		userModel.setUsername(resultSet.getString("username"));
 		userModel.setRole(UserRole.valueOf(resultSet.getString("role")));
+		userModel.setGender(resultSet.getString("gender"));
+		userModel.setCreatedAt(resultSet.getDate("createdAt"));
 
 		return userModel;
 

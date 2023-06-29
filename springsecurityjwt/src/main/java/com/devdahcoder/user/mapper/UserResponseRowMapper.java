@@ -20,6 +20,8 @@ public class UserResponseRowMapper implements RowMapper<UserResponseModel> {
 		userResponseModel.setEmail(resultSet.getString("email"));
 		userResponseModel.setUsername(resultSet.getString("username"));
 		userResponseModel.setRole(resultSet.getString("role"));
+		userResponseModel.setGender(resultSet.getString("gender"));
+		userResponseModel.setCreatedAt(resultSet.getDate("createdAt"));
 
 		return userResponseModel;
 

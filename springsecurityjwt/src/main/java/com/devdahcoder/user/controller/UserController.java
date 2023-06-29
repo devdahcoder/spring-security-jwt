@@ -1,13 +1,14 @@
 package com.devdahcoder.user.controller;
 
-import com.devdahcoder.user.model.UserCreateModel;
-import com.devdahcoder.user.model.UserResponseModel;
-import com.devdahcoder.user.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.devdahcoder.user.service.UserService;
 import org.springframework.web.bind.annotation.*;
+import com.devdahcoder.user.model.UserCreateModel;
+import com.devdahcoder.user.model.UserResponseModel;
+import com.devdahcoder.user.generic.UserGenericListResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -26,17 +27,19 @@ public class UserController {
 
 	@GetMapping
 	@ResponseStatus(code = HttpStatus.OK)
-	public ResponseEntity<List<UserResponseModel>> findAllUsers() {
+	public ResponseEntity<UserGenericListResponse<UserResponseModel>> findAllUsers(
+			@RequestParam(defaultValue = "10", required = false, name = "limit", value = "limit") int limit,
+			@RequestParam(defaultValue = "0", required = false, name = "offset", value = "offset") int offset,
+			@RequestParam(defaultValue = "ASC", required = false, name = "order", value = "order") String order
+	) {
 
-		return new ResponseEntity<>(userService.findAllUsers(), HttpStatus.OK);
+		List<UserResponseModel> users = userService.findAllUsers(limit, offset, order);
 
-	}
-
-	@GetMapping("/hello")
-	@ResponseStatus(code = HttpStatus.OK)
-	public ResponseEntity<String> hello() {
-
-		return new ResponseEntity<>("Hello World", HttpStatus.OK);
+		return new ResponseEntity<>(
+				new UserGenericListResponse<>(
+						0, offset, order, users, limit, userService.countUser(),
+						(int) Math.ceil((double) userService.countUser() / users.size()), false, false, users.size()
+				), HttpStatus.OK);
 
 	}
 

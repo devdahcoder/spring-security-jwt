@@ -1,19 +1,18 @@
 package com.devdahcoder.user.service;
 
-import com.devdahcoder.exception.api.ApiAlreadyExistException;
-import com.devdahcoder.jwt.service.JwtService;
-import com.devdahcoder.user.contract.UserDetailsManagerContract;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.jetbrains.annotations.NotNull;
 import com.devdahcoder.user.contract.UserRole;
+import org.springframework.stereotype.Service;
 import com.devdahcoder.user.model.UserCreateModel;
 import com.devdahcoder.user.model.UserResponseModel;
 import com.devdahcoder.user.repository.UserRepository;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.devdahcoder.exception.api.ApiAlreadyExistException;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.devdahcoder.user.contract.UserDetailsManagerContract;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -23,25 +22,22 @@ public class UserService implements UserDetailsManagerContract {
 	private final Logger logger = LoggerFactory.getLogger(UserService.class);
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final JwtService jwtService;
 
 	@Autowired
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
 		this.userRepository = userRepository;
 
 		this.passwordEncoder = passwordEncoder;
 
-		this.jwtService = jwtService;
-
 	}
 
 	@Override
-	public List<UserResponseModel> findAllUsers() {
+	public List<UserResponseModel> findAllUsers(int limit, int offset, String order) {
 
 		logger.info("Service: finding all users");
 
-		return userRepository.findAllUsers();
+		return userRepository.findAllUsers(limit, offset, order);
 
 	}
 
@@ -65,7 +61,7 @@ public class UserService implements UserDetailsManagerContract {
 	@Override
 	public String createUser(@NotNull UserCreateModel userCreateModel) {
 
-		logger.info("Service: Creating a new user {}", userCreateModel.getEmail());
+		logger.info("Service: Creating a new user {}", userCreateModel.getUsername());
 
 		//*
 		// Generates a new id for everytime this method gets called
@@ -82,11 +78,11 @@ public class UserService implements UserDetailsManagerContract {
         // */
 		userCreateModel.setRole(UserRole.USER);
 
-		logger.info("Service: Checking if user {} exist", userCreateModel.getEmail());
+		logger.info("Service: Checking if user {} exist", userCreateModel.getUsername());
 
 		if (userRepository.userExists(userCreateModel.getUsername())) {
 
-			throw new ApiAlreadyExistException(String.format("User with username %s Already exist", userCreateModel.getUsername()));
+			throw new ApiAlreadyExistException(String.format("User with username %s already exist", userCreateModel.getUsername()));
 
 		}
 
@@ -112,6 +108,13 @@ public class UserService implements UserDetailsManagerContract {
 		logger.info("Service: Checking if user {} existed", username);
 
 		return userRepository.userExists(username);
+
+	}
+
+	@Override
+	public int countUser() {
+
+		return userRepository.countUser();
 
 	}
 

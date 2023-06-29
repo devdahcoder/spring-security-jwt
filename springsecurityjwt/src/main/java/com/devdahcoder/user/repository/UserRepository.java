@@ -1,32 +1,37 @@
 package com.devdahcoder.user.repository;
 
-import com.devdahcoder.exception.database.DatabaseBadSqlGrammarException;
-import com.devdahcoder.exception.database.DatabaseIntegrityConstraintViolationException;
-import com.devdahcoder.exception.database.DatabaseTypeMismatchException;
-import com.devdahcoder.user.contract.UserDetailsManagerContract;
-import com.devdahcoder.exception.api.ApiException;
-import com.devdahcoder.exception.api.ApiNotFoundException;
-import com.devdahcoder.user.extractor.UserResponseExtractor;
-import com.devdahcoder.user.mapper.UserResponseRowMapper;
-import com.devdahcoder.user.model.*;
-import org.jetbrains.annotations.NotNull;
+import com.devdahcoder.user.generic.UserGenericListResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.*;
+import com.devdahcoder.user.model.*;
+import org.jetbrains.annotations.NotNull;
+import com.devdahcoder.user.mapper.UserRowMapper;
+import com.devdahcoder.exception.api.ApiException;
 import org.springframework.jdbc.BadSqlGrammarException;
+import com.devdahcoder.user.contract.UserDetailsContract;
+import com.devdahcoder.user.mapper.UserResponseRowMapper;
+import com.devdahcoder.exception.api.ApiNotFoundException;
+import com.devdahcoder.user.extractor.UserResponseExtractor;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.devdahcoder.user.contract.UserDetailsManagerContract;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
-import org.springframework.jdbc.IncorrectResultSetColumnCountException;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.IncorrectResultSetColumnCountException;
+import com.devdahcoder.exception.database.DatabaseTypeMismatchException;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import com.devdahcoder.exception.database.DatabaseBadSqlGrammarException;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.devdahcoder.exception.database.DatabaseIntegrityConstraintViolationException;
 
 import java.util.List;
 
 @Configuration
-public class UserRepository implements UserDetailsManagerContract {
+public class UserRepository implements UserDetailsService, UserDetailsManagerContract {
 
 	private final Logger logger = LoggerFactory.getLogger(UserRepository.class);
 
@@ -40,13 +45,51 @@ public class UserRepository implements UserDetailsManagerContract {
 	}
 
 	@Override
-	public List<UserResponseModel> findAllUsers() {
-
-		final String sqlQuery = "select * from school.user";
+	public UserDetailsContract loadUserByUsername(String username) throws UsernameNotFoundException {
 
 		try {
 
-			return namedParameterJdbcTemplate.query(sqlQuery, new UserResponseExtractor());
+			String sqlQuery = "select * from school.user where username = :username";
+
+			final SqlParameterSource sqlParameterSource = new MapSqlParameterSource("username", username);
+
+			UserModel user = namedParameterJdbcTemplate.queryForObject(sqlQuery, sqlParameterSource, new UserRowMapper());
+
+			if (user == null) {
+
+				throw new UsernameNotFoundException(String.format("User with username %s not found", username));
+
+			}
+
+			return new UserDetailsModel(user);
+
+		} catch (BadSqlGrammarException ex ) {
+
+			logger.error("BadSqlGrammarException: Sql query could not be accessed because because of query errors");
+
+			throw new DatabaseBadSqlGrammarException("loadUserByUsername:", ex.getSql(), ex.getSQLException());
+
+		} catch (EmptyResultDataAccessException ex) {
+
+			throw new UsernameNotFoundException(String.format("User with username %s not found", username), ex);
+
+		}
+
+	}
+
+	@Override
+	public List<UserResponseModel> findAllUsers(int limit, int offset, String order) {
+
+		final String sqlQuery = "SELECT * FROM school.user ORDER BY id " + order + " LIMIT :limit OFFSET :offset";
+
+		SqlParameterSource findAllUsersSqlParam = new MapSqlParameterSource()
+				.addValue("limit", limit)
+				.addValue("offset", offset)
+				.addValue("order", order);
+
+		try {
+
+			return namedParameterJdbcTemplate.query(sqlQuery, findAllUsersSqlParam, new UserResponseExtractor());
 
 		} catch (BadSqlGrammarException ex) {
 
@@ -127,7 +170,7 @@ public class UserRepository implements UserDetailsManagerContract {
 
 		} catch (EmptyResultDataAccessException ex) {
 
-			throw new ApiNotFoundException("User not found with username: ", 1, ex);
+			throw new ApiNotFoundException("User not found with username: ", ex.getExpectedSize(), ex);
 
 		} catch (DataAccessException ex) {
 
@@ -235,6 +278,15 @@ public class UserRepository implements UserDetailsManagerContract {
 			throw new ApiException("Something went wrong while retrieving user data");
 
 		}
+
+	}
+
+	@Override
+	public int countUser() {
+
+		final String sqlQuery = "SELECT COUNT(*) FROM school.user";
+
+		return namedParameterJdbcTemplate.queryForObject(sqlQuery, new MapSqlParameterSource(), Integer.class);
 
 	}
 

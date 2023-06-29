@@ -1,32 +1,28 @@
 package com.devdahcoder.configuration.security.provider;
 
-import com.devdahcoder.authentication.service.AuthenticationService;
-import com.devdahcoder.configuration.security.authentication.UsernamePasswordAuthentication;
-import com.devdahcoder.user.contract.UserDetailsContract;
-import com.devdahcoder.user.repository.UserRepository;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.devdahcoder.user.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import com.devdahcoder.user.contract.UserDetailsContract;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 @Configuration
 public class UsernamePasswordAuthenticationProvider implements AuthenticationProvider {
 
-	private final AuthenticationService authenticationService;
+	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public UsernamePasswordAuthenticationProvider(AuthenticationService authenticationService, PasswordEncoder passwordEncoder) {
+	public UsernamePasswordAuthenticationProvider(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
-		this.authenticationService = authenticationService;
+		this.userRepository = userRepository;
 
 		this.passwordEncoder = passwordEncoder;
 
@@ -39,7 +35,7 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
 
 		String password = authentication.getCredentials().toString();
 
-		UserDetailsContract userDetails = authenticationService.loadUserByUsername(username);
+		UserDetailsContract userDetails = userRepository.loadUserByUsername(username);
 
 		return authenticationCheck(userDetails, username, password, passwordEncoder);
 
@@ -53,7 +49,7 @@ public class UsernamePasswordAuthenticationProvider implements AuthenticationPro
 
 		} else {
 
-			throw new BadCredentialsException("Bad credentials");
+			throw new BadCredentialsException("Invalid username or password");
 
 		}
 

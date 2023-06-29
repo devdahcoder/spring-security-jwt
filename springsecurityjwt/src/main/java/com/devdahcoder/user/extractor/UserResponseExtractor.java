@@ -1,6 +1,7 @@
 package com.devdahcoder.user.extractor;
 
 import com.devdahcoder.user.model.UserResponseModel;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
@@ -12,7 +13,7 @@ import java.util.List;
 public class UserResponseExtractor implements ResultSetExtractor<List<UserResponseModel>> {
 
 	@Override
-	public List<UserResponseModel> extractData(ResultSet resultSet) throws SQLException, DataAccessException {
+	public List<UserResponseModel> extractData(@NotNull ResultSet resultSet) throws SQLException, DataAccessException {
 
 		List<UserResponseModel> userResponseModelList = new ArrayList<>();
 
@@ -27,6 +28,8 @@ public class UserResponseExtractor implements ResultSetExtractor<List<UserRespon
 			userResponseModel.setEmail(resultSet.getString("email"));
 			userResponseModel.setUsername(resultSet.getString("username"));
 			userResponseModel.setRole(resultSet.getString("role"));
+			userResponseModel.setGender(resultSet.getString("gender"));
+			userResponseModel.setCreatedAt(resultSet.getDate("createdAt"));
 
 			userResponseModelList.add(userResponseModel);
 

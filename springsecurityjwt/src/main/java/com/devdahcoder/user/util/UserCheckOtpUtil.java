@@ -1,8 +1,8 @@
 package com.devdahcoder.user.util;
 
+import org.jetbrains.annotations.NotNull;
 import com.devdahcoder.otp.model.OtpModel;
 import com.devdahcoder.otp.repository.OtpRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration

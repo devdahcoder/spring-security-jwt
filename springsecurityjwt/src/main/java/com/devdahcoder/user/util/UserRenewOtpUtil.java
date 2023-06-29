@@ -1,12 +1,12 @@
 package com.devdahcoder.user.util;
 
+import org.jetbrains.annotations.NotNull;
 import com.devdahcoder.otp.model.OtpModel;
-import com.devdahcoder.otp.repository.OtpRepository;
 import com.devdahcoder.otp.util.GenerateOtpUtil;
 import com.devdahcoder.user.model.UserCreateModel;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.devdahcoder.otp.repository.OtpRepository;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Configuration
 public class UserRenewOtpUtil {

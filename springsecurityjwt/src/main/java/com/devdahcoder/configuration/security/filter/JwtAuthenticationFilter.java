@@ -1,26 +1,25 @@
 package com.devdahcoder.configuration.security.filter;
 
-import com.devdahcoder.authentication.service.AuthenticationService;
-import com.devdahcoder.jwt.service.JwtService;
-import com.devdahcoder.user.contract.UserDetailsContract;
-import com.devdahcoder.user.service.UserService;
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.FilterChain;
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.ServletException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.devdahcoder.jwt.service.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+import com.devdahcoder.user.repository.UserRepository;
+import com.devdahcoder.user.contract.UserDetailsContract;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.io.IOException;
 
@@ -29,14 +28,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final static Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
-    private final AuthenticationService authenticationService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public JwtAuthenticationFilter(JwtService jwtService, AuthenticationService authenticationService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
 
         this.jwtService = jwtService;
 
-        this.authenticationService = authenticationService;
+        this.userRepository = userRepository;
 
     }
 
@@ -57,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                    UserDetailsContract userDetails = authenticationService.loadUserByUsername(username);
+                    UserDetailsContract userDetails = userRepository.loadUserByUsername(username);
 
                     if (jwtService.isTokenValid(jwtToken, userDetails)) {
 

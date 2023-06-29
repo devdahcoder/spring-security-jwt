@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.sql.Date;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -21,11 +22,26 @@ public class UserModel implements UserDetailsContract {
 	private String pwdAlgo;
 	private String password;
 	private UserRole role;
+	private String gender;
+	private Date createdAt;
 	private List<GrantedAuthority> authorities;
 
 	public UserModel() {}
 
-	public UserModel(Long id, UUID userId, String firstName, String lastName, String username, String email, String pwdAlgo, String password, UserRole role, List<GrantedAuthority> authorities) {
+	public UserModel(
+			Long id,
+			UUID userId,
+			String firstName,
+			String lastName,
+			String username,
+			String email,
+			String pwdAlgo,
+			String password,
+			UserRole role,
+			String gender,
+			Date createdAt,
+			List<GrantedAuthority> authorities
+	) {
 
         this.id = id;
         this.userId = userId;
@@ -36,6 +52,8 @@ public class UserModel implements UserDetailsContract {
         this.pwdAlgo = pwdAlgo;
         this.password = password;
         this.role = UserRole.valueOf(role.toString());
+		this.gender = gender;
+		this.createdAt = createdAt;
         this.authorities = authorities;
 
     }
@@ -148,6 +166,36 @@ public class UserModel implements UserDetailsContract {
 	public void setRole(@NotNull UserRole role) {
 
 		this.role = UserRole.valueOf(role.toString());
+
+	}
+
+	public String getGender() {
+
+		return gender;
+
+	}
+
+	public void setGender(String gender) {
+
+		this.gender = gender;
+
+	}
+
+	public Date getCreatedAt() {
+
+		return createdAt;
+
+	}
+
+	public void setCreatedAt(Date createdAt) {
+
+		this.createdAt = createdAt;
+
+	}
+
+	public void setAuthorities(List<GrantedAuthority> authorities) {
+
+		this.authorities = authorities;
 
 	}
 
