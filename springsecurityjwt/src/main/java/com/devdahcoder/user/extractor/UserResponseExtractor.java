@@ -1,41 +1,41 @@
 package com.devdahcoder.user.extractor;
 
-import com.devdahcoder.user.model.UserResponseModel;
+import java.util.List;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.sql.SQLException;
+
 import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.DataAccessException;
+import com.devdahcoder.user.model.UserQueryModel;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-public class UserResponseExtractor implements ResultSetExtractor<List<UserResponseModel>> {
+public class UserResponseExtractor implements ResultSetExtractor<List<UserQueryModel>> {
 
 	@Override
-	public List<UserResponseModel> extractData(@NotNull ResultSet resultSet) throws SQLException, DataAccessException {
+	public List<UserQueryModel> extractData(@NotNull ResultSet resultSet) throws SQLException, DataAccessException {
 
-		List<UserResponseModel> userResponseModelList = new ArrayList<>();
+		List<UserQueryModel> userQueryModelList = new ArrayList<>();
 
 		while(resultSet.next()) {
 
-			UserResponseModel userResponseModel = new UserResponseModel();
+			UserQueryModel userQueryModel = new UserQueryModel();
 
-			userResponseModel.setId(resultSet.getLong("id"));
-			userResponseModel.setUserId(resultSet.getString("userId"));
-			userResponseModel.setFirstName(resultSet.getString("firstName"));
-			userResponseModel.setLastName(resultSet.getString("lastName"));
-			userResponseModel.setEmail(resultSet.getString("email"));
-			userResponseModel.setUsername(resultSet.getString("username"));
-			userResponseModel.setRole(resultSet.getString("role"));
-			userResponseModel.setGender(resultSet.getString("gender"));
-			userResponseModel.setCreatedAt(resultSet.getDate("createdAt"));
+			userQueryModel.setId(resultSet.getLong("id"));
+			userQueryModel.setUserId(resultSet.getString("userId"));
+			userQueryModel.setFirstName(resultSet.getString("firstName"));
+			userQueryModel.setLastName(resultSet.getString("lastName"));
+			userQueryModel.setEmail(resultSet.getString("email"));
+			userQueryModel.setUsername(resultSet.getString("username"));
+			userQueryModel.setRole(resultSet.getString("role"));
+			userQueryModel.setGender(resultSet.getString("gender"));
+			userQueryModel.setCreatedAt(resultSet.getDate("createdAt"));
 
-			userResponseModelList.add(userResponseModel);
+			userQueryModelList.add(userQueryModel);
 
 		}
 
-		return userResponseModelList;
+		return userQueryModelList;
 
 	}
 

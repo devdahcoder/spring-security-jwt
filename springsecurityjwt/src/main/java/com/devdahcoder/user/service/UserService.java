@@ -1,20 +1,19 @@
 package com.devdahcoder.user.service;
 
+import com.devdahcoder.user.model.UserResponseModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jetbrains.annotations.NotNull;
 import com.devdahcoder.user.contract.UserRole;
 import org.springframework.stereotype.Service;
 import com.devdahcoder.user.model.UserCreateModel;
-import com.devdahcoder.user.model.UserResponseModel;
+import com.devdahcoder.user.model.UserQueryModel;
 import com.devdahcoder.user.repository.UserRepository;
 import com.devdahcoder.exception.api.ApiAlreadyExistException;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.devdahcoder.user.contract.UserDetailsManagerContract;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.List;
 
 @Service
 public class UserService implements UserDetailsManagerContract {
@@ -33,7 +32,7 @@ public class UserService implements UserDetailsManagerContract {
 	}
 
 	@Override
-	public List<UserResponseModel> findAllUsers(int limit, int offset, String order) {
+	public UserResponseModel findAllUsers(int limit, int offset, String order) {
 
 		logger.info("Service: finding all users");
 
@@ -41,7 +40,7 @@ public class UserService implements UserDetailsManagerContract {
 
 	}
 
-	public UserResponseModel findUserById(int id) {
+	public UserQueryModel findUserById(int id) {
 
 		logger.info("Service: finding user by id");
 
@@ -50,7 +49,7 @@ public class UserService implements UserDetailsManagerContract {
 	}
 
 	@Override
-	public UserResponseModel findUserByUsername(String username) {
+	public UserQueryModel findUserByUsername(String username) {
 
 		logger.info("Service: finding user by username");
 
@@ -112,9 +111,9 @@ public class UserService implements UserDetailsManagerContract {
 	}
 
 	@Override
-	public int countUser() {
+	public int countAllUser() {
 
-		return userRepository.countUser();
+		return userRepository.countAllUser();
 
 	}
 

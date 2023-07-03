@@ -1,4 +1,4 @@
-package com.devdahcoder.user.generic;
+package com.devdahcoder.user.model;
 
 import java.util.List;
 

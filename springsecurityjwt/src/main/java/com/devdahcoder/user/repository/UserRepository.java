@@ -1,6 +1,5 @@
 package com.devdahcoder.user.repository;
 
-import com.devdahcoder.user.generic.UserGenericListResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.*;
@@ -78,7 +77,7 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	}
 
 	@Override
-	public List<UserResponseModel> findAllUsers(int limit, int offset, String order) {
+	public UserResponseModel findAllUsers(int limit, int offset, String order) {
 
 		final String sqlQuery = "SELECT * FROM school.user ORDER BY id " + order + " LIMIT :limit OFFSET :offset";
 
@@ -89,11 +88,15 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 		try {
 
-			return namedParameterJdbcTemplate.query(sqlQuery, findAllUsersSqlParam, new UserResponseExtractor());
+			int userQueryCount = this.countAllUser();
+
+			List<UserQueryModel> userQueryResult = namedParameterJdbcTemplate.query(sqlQuery, findAllUsersSqlParam, new UserResponseExtractor());
+
+			return new UserResponseModel<>(userQueryResult, userQueryCount);
 
 		} catch (BadSqlGrammarException ex) {
 
-			logger.error("Bad SQL grammar exception occurred error executing database query: {}", ex.getSql());
+			logger.error("Bad SQL grammar exception occurred error when executing database query: {}", ex.getSql());
 
 			throw new DatabaseBadSqlGrammarException("findAllUsers", ex.getSql(), ex.getSQLException());
 
@@ -119,7 +122,7 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 
 	}
 
-	public UserResponseModel findUserById(int id) {
+	public UserQueryModel findUserById(int id) {
 
 		final String sqlQuery = "select * from school.user where id = :id";
 
@@ -158,7 +161,7 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	}
 
 	@Override
-	public UserResponseModel findUserByUsername(String username) {
+	public UserQueryModel findUserByUsername(String username) {
 
 		final String sqlQuery = "select * from user where username = :username";
 
@@ -282,11 +285,32 @@ public class UserRepository implements UserDetailsService, UserDetailsManagerCon
 	}
 
 	@Override
-	public int countUser() {
+	public int countAllUser() {
 
 		final String sqlQuery = "SELECT COUNT(*) FROM school.user";
 
-		return namedParameterJdbcTemplate.queryForObject(sqlQuery, new MapSqlParameterSource(), Integer.class);
+		final String databaseAccessExceptionMessage = "Something went wrong while retrieving database user count";
+		final String databaseBadSqlGrammarExceptionMessage = "Bad sql grammar, there was an issue with the sql query";
+
+		try {
+
+			Integer queryResult = namedParameterJdbcTemplate.queryForObject(sqlQuery, new MapSqlParameterSource(), Integer.class);
+
+			return queryResult != null ? queryResult : 0;
+
+		} catch (BadSqlGrammarException ex) {
+
+			logger.error(databaseBadSqlGrammarExceptionMessage + " {0} ", ex);
+
+			throw new DatabaseBadSqlGrammarException("countAllUser", ex.getSql(), ex.getSQLException());
+
+		} catch (DataAccessException ex) {
+
+			logger.error(databaseAccessExceptionMessage + " {0} ", ex);
+
+			throw new ApiException(databaseAccessExceptionMessage, ex);
+
+		}
 
 	}
 

@@ -1,151 +1,70 @@
 package com.devdahcoder.user.model;
 
-import java.sql.Date;
+import java.util.List;
+import java.util.Objects;
 
-public class UserResponseModel {
+public class UserResponseModel<T> {
 
-	private Long id;
-	private String userId;
-	private String firstName;
-	private String lastName;
-	private String email;
-	private String username;
-	private String role;
-	private String gender;
-	private Date createdAt;
+    private List<T> data;
+    private int totalData;
 
-	public UserResponseModel() {}
+    public UserResponseModel(List<T> data, int totalData) {
 
-	public UserResponseModel(
-			Long id,
-			String userId,
-			String firstName,
-			String lastName,
-			String email,
-			String username,
-			String role,
-			String gender,
-			Date createdAt
-	) {
+        this.data = data;
+        this.totalData = totalData;
 
-		this.id = id;
-		this.userId = userId;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.email = email;
-		this.username = username;
-		this.role = role;
-		this.gender = gender;
-		this.createdAt = createdAt;
+    }
 
-	}
+    public List<T> getData() {
 
-	public Long getId() {
+        return data;
 
-		return id;
+    }
 
-	}
+    public void setData(List<T> data) {
 
-	public void setId(Long id) {
+        this.data = data;
 
-		this.id = id;
+    }
 
-	}
+    public int getTotalData() {
 
-	public String getUserId() {
+        return totalData;
 
-		return userId;
+    }
 
-	}
+    public void setTotalData(int totalData) {
 
-	public void setUserId(String userId) {
+        this.totalData = totalData;
 
-		this.userId = userId;
+    }
 
-	}
+    @Override
+    public boolean equals(Object o) {
 
-	public String getFirstName() {
+        if (this == o) return true;
 
-		return firstName;
+        if (!(o instanceof UserResponseModel<?> that)) return false;
 
-	}
+        return getTotalData() == that.getTotalData() && Objects.equals(getData(), that.getData());
 
-	public void setFirstName(String firstName) {
+    }
 
-		this.firstName = firstName;
+    @Override
+    public int hashCode() {
 
-	}
+        return Objects.hash(getData(), getTotalData());
 
-	public String getLastName() {
+    }
 
-		return lastName;
+    @Override
+    public String toString() {
 
-	}
+        return "UserResponseModel{" +
+                "data=" + data +
+                ", totalData=" + totalData +
+                '}';
 
-	public void setLastName(String lastName) {
-
-		this.lastName = lastName;
-
-	}
-
-	public String getEmail() {
-
-		return email;
-
-	}
-
-	public void setEmail(String email) {
-
-		this.email = email;
-
-	}
-
-	public String getUsername() {
-
-		return username;
-
-	}
-
-	public void setUsername(String username) {
-
-		this.username = username;
-
-	}
-
-	public String getRole() {
-
-		return role;
-
-	}
-
-	public void setRole(String role) {
-
-		this.role = role;
-
-	}
-
-	public String getGender() {
-
-		return gender;
-
-	}
-
-	public void setGender(String gender) {
-
-		this.gender = gender;
-
-	}
-
-	public Date getCreatedAt() {
-
-		return createdAt;
-
-	}
-
-	public void setCreatedAt(Date createdAt) {
-
-		this.createdAt = createdAt;
-
-	}
+    }
 
 }

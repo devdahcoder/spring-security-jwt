@@ -1,29 +1,29 @@
 package com.devdahcoder.user.mapper;
 
-import com.devdahcoder.user.model.UserResponseModel;
+import com.devdahcoder.user.model.UserQueryModel;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UserResponseRowMapper implements RowMapper<UserResponseModel> {
+public class UserResponseRowMapper implements RowMapper<UserQueryModel> {
 
 	@Override
-	public UserResponseModel mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+	public UserQueryModel mapRow(ResultSet resultSet, int rowNum) throws SQLException {
 
-		UserResponseModel userResponseModel = new UserResponseModel();
+		UserQueryModel userQueryModel = new UserQueryModel();
 
-		userResponseModel.setId(resultSet.getLong("id"));
-		userResponseModel.setUserId(resultSet.getString("userId"));
-		userResponseModel.setFirstName(resultSet.getString("firstName"));
-		userResponseModel.setLastName(resultSet.getString("lastName"));
-		userResponseModel.setEmail(resultSet.getString("email"));
-		userResponseModel.setUsername(resultSet.getString("username"));
-		userResponseModel.setRole(resultSet.getString("role"));
-		userResponseModel.setGender(resultSet.getString("gender"));
-		userResponseModel.setCreatedAt(resultSet.getDate("createdAt"));
+		userQueryModel.setId(resultSet.getLong("id"));
+		userQueryModel.setUserId(resultSet.getString("userId"));
+		userQueryModel.setFirstName(resultSet.getString("firstName"));
+		userQueryModel.setLastName(resultSet.getString("lastName"));
+		userQueryModel.setEmail(resultSet.getString("email"));
+		userQueryModel.setUsername(resultSet.getString("username"));
+		userQueryModel.setRole(resultSet.getString("role"));
+		userQueryModel.setGender(resultSet.getString("gender"));
+		userQueryModel.setCreatedAt(resultSet.getDate("createdAt"));
 
-		return userResponseModel;
+		return userQueryModel;
 
 	}
 }

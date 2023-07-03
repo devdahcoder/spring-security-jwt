@@ -81,14 +81,6 @@ vspringsecurityjwt/src/main/java/com/devdahcoder/exception/security/SecurityInte
 ispringsecurityjwt/src/main/java/com/devdahcoder/exception/security/SecurityProviderNotFoundException.java,a\b\ab3ee1464f92775db02ae4d27b5c88ed8bec9e54
 ‘
 aspringsecurityjwt/src/main/java/com/devdahcoder/authentication/service/AuthenticationService.java,8\1\81e68e3990b51f3a561e21496c14139c2c13a23b
-
-Ospringsecurityjwt/src/main/java/com/devdahcoder/exception/api/ApiException.java,d\7\d7c9a373aad06e599081922eb13614a56cab5b7c
-
-Ospringsecurityjwt/src/main/java/com/devdahcoder/user/util/UserRenewOtpUtil.java,c\b\cbdcbcffab9bb06dc81ed15e163d563f49eab4ad
-†
-Vspringsecurityjwt/src/main/java/com/devdahcoder/user/util/UserOtpVerificationUtil.java,e\d\edaa4c6e61f6caafcf9e132d03d298a908122929
-
-Ospringsecurityjwt/src/main/java/com/devdahcoder/user/util/UserCheckOtpUtil.java,f\b\fbaf300f071e288b503fb64ea7a7cea029b3b913
 †
 Vspringsecurityjwt/src/main/java/com/devdahcoder/user/contract/UserDetailsContract.java,0\5\058814cf16e87e70d7306c8a7a79e065e3cb101e
 «
